@@ -5,6 +5,8 @@ A running record of how this project works and why it is built this way: every c
 | File | Contents |
 |------|----------|
 | [00-project-overview.md](00-project-overview.md) | What the project is, the problem it solves, how it works end to end |
+| [01-learning-resources.md](01-learning-resources.md) | Curated, trusted learning resources (standards, papers, books, courses) |
+| [02-value-proposition.md](02-value-proposition.md) | Landscape of existing tools, the gap we fill, concrete deliverables |
 | [decisions.md](decisions.md) | Decision log (ADR-style): one entry per decision, with context, options, choice and rationale |
 
 New topics get their own numbered file (`01-<topic>.md`, `02-<topic>.md`, …) and a row in this table.

@@ -13,3 +13,8 @@ Format per entry: **ID · date · status**, then Context / Options / Decision / 
 ### D-002 · 2026-11-06 · accepted
 **Decision:** repo name `mcp-security-gateway-hashchain-audit`; Python `src/` layout, with one package `mcp_gateway` split into `validation/`, `policy/`, `audit/` and `proxy/`.
 **Rationale:** the name states the three technical pieces; each subpackage maps to one stage of the pipeline, so each can be tested on its own.
+
+### D-003 · 2026-11-06 · proposed (awaiting owner approval)
+**Context:** MCP gateways and hash-chained agent loggers both already exist (see notes/02).
+**Decision:** position the project as *agent-proof logging*: the recorder sits outside the agent's trust boundary, with an external anchor and a standalone verifier. Ship four deliverables: drop-in stdio proxy, open log format + verifier, attack test suite mapped to OWASP ASI, and threat model write-up. The weekend MVP is the proxy, a basic verifier and a few attack cases.
+**Rationale:** it differentiates from in-process audit SDKs; it is directly useful to the Apart Track 4.2 forensics work; the format and test suite are things others can build on.
