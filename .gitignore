@@ -6,3 +6,4 @@ __pycache__/
 dist/
 logs/
 .pytest_cache/
+CLAUDE.md
