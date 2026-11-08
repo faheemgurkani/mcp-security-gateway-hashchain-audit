@@ -1,5 +1,7 @@
 # 02: What value this project delivers (beyond "another repo")
 
+> **SUPERSEDED (2026-11-08)** by [03-research-validation.md](03-research-validation.md) and D-004. The landscape below was too shallow and the claimed gap was already filled. Kept unchanged for history.
+
 ## The honest landscape (Nov 2026)
 Both halves of this idea already exist separately:
 - **MCP gateways/proxies:** hoophq/mcpproxy (Go), Enkrypt MCP Gateway, agentsec-gateway, SentinelGate, MCP Guardian, Docker MCP Gateway.

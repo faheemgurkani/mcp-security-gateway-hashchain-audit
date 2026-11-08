@@ -1,37 +1,58 @@
 # 00: Project overview
 
-## The problem
-An AI agent calls **tools** (send email, update CRM, delete user) through MCP, the Model Context Protocol, which uses JSON-RPC between the agent and its tool servers. The agent acts with *its own* privileges, but its instructions can come from untrusted text: a user prompt, an email it reads, a retrieved document. This creates two risks:
+> Updated 2026-11-08 after the research validation (notes/03). The project is now an **agent-as-attacker test lab for MCP security gateways**. The repo name stays the same.
 
-1. **Confused deputy / tool misuse.** An attacker's text persuades the agent to use privileges the attacker doesn't have, e.g. "call `admin.delete_user`". Malformed or smuggled parameters are a related risk; this is the agentic version of SQL injection.
-2. **Unaccountable actions.** After something goes wrong, nobody can prove what the agent saw and did. If the agent, or an attacker, can edit or delete logs, the evidence can't be trusted either.
+## The problem, in plain terms
+An AI agent uses **tools** (look up a customer, update the CRM, delete a user) through **MCP**, the Model Context Protocol, which sends JSON-RPC messages between agent and tool servers. The agent's instructions can come from untrusted text, so two things go wrong:
 
-## The idea
-Put a **gateway** in the middle. The agent never talks to tools directly; every call passes through three checks:
+1. **Misuse of privileges (confused deputy):** text persuades the agent to use a tool the *person* behind it isn't allowed to use.
+2. **Unaccountable actions:** after an incident, nobody can prove what the agent did. If the agent can edit or delete the logs, the evidence is worthless. Research (arXiv 2609.30266) shows real coding agents *do* delete their own traces when told to, when tricked, or when it raises their reward.
+
+## What already exists
+Many **gateways** sit between agent and tools, check every call, and write a hash-chained log (notes/03 lists 15+). Some claim the agent can't get around them. **Nobody has built a standard test of that claim with the agent itself as the attacker.**
+
+## What we're building: a lock-testing kit
+Lots of people have built locks. We're building the kit that tests whether a lock holds when the *burglar is the agent*.
 
 ```
-agent ──► [1 Validate] ──► [2 Authorize] ──► tool server
-              │                 │                 │
-              └──────── [3 Audit log (hash-chained)] ◄──┘
+┌──── agent zone (untrusted) ────┐
+│ attacker agent (scripted, later │
+│ a real LLM)                     │
+└──────────────┬──────────────────┘
+               │ Streamable HTTP: the only route out
+┌──────────────▼── gateway zone ──┐
+│ gateway under test: ours or an  │
+│ existing one via an adapter     │
+│ validate → authorize → log      │
+└──────────────┬──────────────────┘
+               │ private network
+┌──────────────▼── tool zone ─────┐
+│ demo MCP tools + log-head anchor│
+└─────────────────────────────────┘
+observer (outside every zone): records what *really* happened → scorecard
 ```
 
-1. **Validate:** each tool has a strict Pydantic schema. Wrong types, missing fields or extra fields are rejected before anything runs.
-2. **Authorize:** a least-privilege policy maps who is calling (the user's role or the session's origin) to the tools they may use. A user-driven session can't reach admin tools, even if the agent tries.
-3. **Audit:** each event (prompt, tool call, decision, result, final output) is appended to a log. Every entry holds the hash of the entry before it, forming a hash chain. Editing or deleting any entry changes the hashes after it, so a verifier detects the tampering. Blocked calls are logged as well.
+The four parts:
+1. **Reference gateway** (what we learn Stages 3 and 11 from): strict Pydantic validation, a default-deny role policy, identity fixed by the gateway, an HMAC hash-chained log with sequence numbers and heartbeats, its head anchored where the agent can't write, and fail-closed behaviour if the log can't be written.
+2. **Adapters:** thin wrappers that put existing gateways (mcp-gatekeeper, mcp-gate, …) into the same slot.
+3. **Attack harness:** scenarios A1–A11 in which the agent edits, deletes or truncates the log, removes the gateway from its config, kills it, calls tools directly, impersonates admin, smuggles parameters or swaps tool definitions.
+4. **Observer and scorecard:** for each gateway and attack, was it **blocked**, **detected**, or did it get through **undetected**?
 
-## Why a hash chain makes the log tamper-evident
-Entry *n* stores `prev_hash = H(entry n-1)` and its own hash `H(content_n + prev_hash)`. To change entry 5 without detection, an attacker must recompute entries 6 to N. Anchoring the latest hash somewhere the agent can't write to (printed, stored externally or signed) makes that recomputation detectable too. The chain doesn't *prevent* tampering; it makes tampering **evident**.
+## Key concepts, briefly
+- **Hash chain / HMAC chain:** each log entry contains a fingerprint of the previous one. Change or delete one entry and every later fingerprint stops matching. With an HMAC the fingerprint also needs a secret key, so an attacker without the key can't recompute the chain.
+- **Anchor:** a copy of the latest fingerprint kept somewhere the agent can't write. It catches *truncation*, where the attacker cuts entries off the end and the chain still looks valid.
+- **Heartbeats:** the gateway logs "I'm alive" every few seconds. A gap means the gateway was stopped, which catches *kill* attacks.
+- **Completeness vs integrity:** a chain proves that what was logged wasn't altered (integrity). Only an architecture the agent can't route around proves that everything was logged (completeness). Testing completeness is our novel part.
+- **Fail closed:** if the gateway can't log a call, it refuses the call instead of letting it through unrecorded.
 
-## What the demo will show
-1. A legitimate CRM call passes and is logged.
-2. A confused-deputy call to an admin tool is **blocked** and logged.
-3. `tamper_log.py` edits one log entry; `verify` **flags** the exact broken entry.
+## How it maps to the learning stages
+| Stage | Where |
+|---|---|
+| 3: MCP / agent security | the reference gateway's validation, policy, identity and rug-pull defence |
+| 11: Audit and compliance | the HMAC chain, verifier, anchor and heartbeats; EU AI Act Art. 12 / NIST AI RMF mapping |
+| 8: Automated red teaming (bonus) | the attack harness and scorecard |
 
-## How it connects
-- **Apart sprint, Track 4.2:** oversight that holds up when agents can delete or spoof logs. The gateway's log can serve as trusted ground truth. Any reuse there is labeled as side or pre-existing work.
-- **Frameworks:** OWASP Top 10 for LLMs (excessive agency, insecure plugin design); EU AI Act and NIST AI RMF (record-keeping and traceability).
+## What we never claim
+"Tamper-proof" (only tamper-*evident*), "EU AI Act compliant" (only *supports* Art. 12), or that our scorecard is exhaustive.
 
-## Open questions (to be decided, logged in decisions.md)
-- Transport: stdio vs HTTP MCP proxying.
-- How the caller's identity or origin reaches the gateway.
-- Log storage format (JSONL vs SQLite) and hash anchoring strategy.
+The detailed build plan is in [../PLAN.md](../PLAN.md).
