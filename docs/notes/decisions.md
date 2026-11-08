@@ -42,3 +42,15 @@ Format per entry: **ID · date · status**, then Context / Options / Decision / 
 
 ### D-009 · 2026-11-08 · accepted
 **Decision:** during implementation, commit and push gradually as each step passes, as `faheemgurkani`, with no AI attribution. No force-push or history rewrite without asking.
+
+### D-010 · 2026-11-09 · accepted
+**Context:** with only the isolated reference setup, every attack is simply "blocked". That doesn't show *which* defence does the work, or how a typical deployment fares.
+**Decision:** run every scenario against three **deployment profiles** of the same gateway code:
+- `reference`: isolated zones.
+- `breach`: the agent can write to the log volume, but has no key and no anchor.
+- `colocated`: the gateway runs as the agent's own user, with the log, key, anchor and tool credential on the agent's disk. This is the usual real-world wrapper setup.
+**Rationale:** it separates the value of isolation (reference vs colocated) from the value of the cryptographic layer (breach). The colocated profile also serves as the baseline that external gateways will be compared against in M8.
+
+### D-011 · 2026-11-09 · accepted
+**Decision:** the scripted attacker is the **strongest one the lab can justify**. It discovers targets itself (filesystem and `/proc` search, never handed paths). If it finds the key, it stops the gateway, rewrites the log with a recomputed chain and anchor, fills time gaps with forged heartbeats, and restarts the gateway with its original command line.
+**Rationale:** a weak attacker makes defences look better than they are. The first colocated run showed truncation "detected" only because of an incidental time gap; a key-holding attacker can trivially forge heartbeats, so we model that.

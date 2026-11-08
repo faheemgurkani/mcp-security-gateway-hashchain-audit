@@ -1,0 +1,14 @@
+# "Breach" profile: assume the isolation partly failed. The agent runs with
+# the gateway's UID and has the audit-log volume mounted read-write, but NOT
+# the HMAC key or the anchor volume. This measures what the cryptographic
+# layer (HMAC chain + external anchor) catches on its own.
+#
+# Usage: docker compose -f docker-compose.yml -f breach.yml up -d
+services:
+  agent:
+    user: gateway
+    environment:
+      AGENT_MCP_CONFIG: /etc/agent/mcp.json  # /home/agent is 0700 to other UIDs
+    volumes:
+      - ../.run/agent/mcp.json:/etc/agent/mcp.json
+      - audit_log:/var/lib/gateway/log

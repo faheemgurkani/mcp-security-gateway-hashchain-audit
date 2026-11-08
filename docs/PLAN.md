@@ -7,7 +7,7 @@
 - [x] M3: Policy, validation and identity
 - [x] M4: Reference gateway proxy
 - [x] M5: Lab infrastructure
-- [ ] M6: Attack harness (scripted)
+- [x] M6: Attack harness (scripted)
 - [ ] M7: Real-agent mode
 - [ ] M8: Adapters and scorecard
 - [ ] M9: Write-up

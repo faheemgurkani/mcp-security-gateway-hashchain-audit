@@ -59,6 +59,7 @@ services:
     command: ["sleep", "infinity"]
     environment:
       AGENT_MCP_CONFIG: /home/agent/mcp.json
+      HEARTBEAT_S: ${HEARTBEAT_S:-2}
     volumes:
       - ../.run/agent/mcp.json:/home/agent/mcp.json  # the agent's own, writable config
     networks: [agent_net]

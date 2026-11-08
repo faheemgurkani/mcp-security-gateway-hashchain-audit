@@ -1,0 +1,22 @@
+# "Colocated" profile: the common real-world deployment. The gateway is a
+# local wrapper started from the agent's own environment, running as the
+# agent's OS user, with its log, anchor, key and upstream credential on the
+# agent's disk. The tool server is still remote (tool zone), so its ledger
+# remains trustworthy ground truth.
+#
+# Usage: docker compose -f docker-compose.yml -f colocated.yml up -d
+services:
+  gateway:
+    profiles: ["reference-only"]  # not started in this profile
+
+  agent:
+    command: ["sh", "/app/lab/compose/colocated-entry.sh"]
+    networks: [agent_net, tool_net]
+    depends_on: !reset []
+    volumes:
+      - ../.run/agent/mcp.json:/home/agent/mcp.json
+      - ../.run/colocated:/home/agent/.gateway-secrets:ro
+    healthcheck:
+      test: ["CMD", "python", "-c", "import socket; socket.create_connection(('127.0.0.1', 8000), 1)"]
+      interval: 1s
+      retries: 30

@@ -19,9 +19,31 @@ from mcp_gateway.audit import FileAnchor, VerifyReport, verify_log
 ROOT = Path(__file__).resolve().parents[2]
 COMPOSE = ["docker", "compose", "-f", str(ROOT / "lab/compose/docker-compose.yml")]
 RUN = ROOT / "lab/.run"
-LOG = "/var/lib/gateway/log/audit.jsonl"
-ANCHOR = "/var/lib/gateway/anchor/head.json"
 LEDGER = "/var/lib/tools/ledger.jsonl"
+# Where each profile's gateway keeps its log and anchor: (service, log, anchor).
+LOCATIONS = {
+    "reference": (
+        "gateway",
+        "/var/lib/gateway/log/audit.jsonl",
+        "/var/lib/gateway/anchor/head.json",
+    ),
+    "colocated": ("agent", "/home/agent/.gateway/audit.jsonl", "/home/agent/.gateway/head.json"),
+}
+LOCATIONS["breach"] = LOCATIONS["reference"]
+COMPOSE_FILES = {
+    "reference": ["lab/compose/docker-compose.yml"],
+    "colocated": ["lab/compose/docker-compose.yml", "lab/compose/colocated.yml"],
+    "breach": ["lab/compose/docker-compose.yml", "lab/compose/breach.yml"],
+}
+_profile = "reference"
+
+
+def set_profile(profile: str) -> None:
+    global COMPOSE, _profile
+    _profile = profile
+    COMPOSE = ["docker", "compose"] + [
+        x for f in COMPOSE_FILES[profile] for x in ("-f", str(ROOT / f))
+    ]
 
 
 def compose(*args: str, check: bool = True) -> subprocess.CompletedProcess[str]:
@@ -94,10 +116,11 @@ def docker_events(since: float) -> list[dict]:
 
 def snapshot(since: float, max_gap_ms: int | None = None) -> Snapshot:
     key = bytes.fromhex((RUN / "operator/audit.key").read_text().strip())
+    service, log_path, anchor_path = LOCATIONS[_profile]
     with tempfile.TemporaryDirectory() as d:
         log, anchor = Path(d) / "audit.jsonl", Path(d) / "head.json"
-        have_log = copy_out("gateway", LOG, log)
-        have_anchor = copy_out("gateway", ANCHOR, anchor)
+        have_log = copy_out(service, log_path, log)
+        have_anchor = copy_out(service, anchor_path, anchor)
         audit = _jsonl(log.read_text()) if have_log else []
         report = (
             verify_log(log, key, FileAnchor(anchor).read() if have_anchor else None, max_gap_ms)
