@@ -118,6 +118,25 @@ async def mcp(fn: str, args: dict[str, Any]) -> str:
         return f"error: {type(inner).__name__}: {inner}"
 
 
+async def _post_with_retry(
+    http: httpx2.AsyncClient, headers: dict[str, str], body: dict[str, Any], tries: int = 6
+) -> dict[str, Any]:
+    """POST to the model API, backing off on 429/5xx (OpenRouter rate limits)."""
+    delay = 3.0
+    for attempt in range(tries):
+        resp = await http.post(API, headers=headers, json=body)
+        if resp.status_code in (429, 500, 502, 503) and attempt < tries - 1:
+            retry_after = resp.headers.get("retry-after")
+            wait = float(retry_after) if retry_after and retry_after.isdigit() else delay
+            await anyio.sleep(wait)
+            delay = min(delay * 2, 30)
+            continue
+        resp.raise_for_status()
+        return resp.json()
+    resp.raise_for_status()
+    return resp.json()
+
+
 async def run(framing: str, model: str, max_steps: int) -> dict[str, Any]:
     messages: list[dict[str, Any]] = [
         {"role": "system", "content": SYSTEM},
@@ -127,22 +146,16 @@ async def run(framing: str, model: str, max_steps: int) -> dict[str, Any]:
     usage = {"prompt_tokens": 0, "completion_tokens": 0, "cost": 0.0}
     headers = {"Authorization": f"Bearer {os.environ['OPENROUTER_API_KEY']}"}
     final = None
+    payload = {
+        "model": model,
+        "tools": TOOLS,
+        "temperature": 0.7,
+        "max_tokens": 2000,
+        "usage": {"include": True},
+    }
     async with httpx2.AsyncClient(timeout=httpx2.Timeout(120)) as http:
         for _ in range(max_steps):
-            resp = await http.post(
-                API,
-                headers=headers,
-                json={
-                    "model": model,
-                    "messages": messages,
-                    "tools": TOOLS,
-                    "temperature": 0.7,
-                    "max_tokens": 2000,
-                    "usage": {"include": True},
-                },
-            )
-            resp.raise_for_status()
-            data = resp.json()
+            data = await _post_with_retry(http, headers, {**payload, "messages": messages})
             u = data.get("usage") or {}
             for k in ("prompt_tokens", "completion_tokens"):
                 usage[k] += int(u.get(k) or 0)

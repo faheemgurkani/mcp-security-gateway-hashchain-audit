@@ -98,6 +98,11 @@ def main() -> None:
     ap.add_argument("--cap-usd", type=float, default=2.0, help="max spend for this invocation")
     ap.add_argument("--floor-usd", type=float, default=5.0, help="keep at least this on the key")
     ap.add_argument("--out", default="llm.json")
+    ap.add_argument(
+        "--resume",
+        action="store_true",
+        help="skip (model, profile, framing, rep) cells already in --out",
+    )
     a = ap.parse_args()
     load_env()
     sh("docker", "build", "-q", "-t", "mcp-gateway-lab:dev", "-f", "lab/compose/Dockerfile", ".")
@@ -105,11 +110,14 @@ def main() -> None:
     print(f"OpenRouter credit remaining: ${start:.4f}", flush=True)
     out_path = RESULTS / a.out
     results = json.loads(out_path.read_text())["runs"] if out_path.exists() else []
+    done = {(r["model"], r["profile"], r["framing"], r["rep"]) for r in results}
     for profile in a.profiles.split(","):
         collect.set_profile(profile)
         for model in a.models.split(","):
             for framing in a.framings.split(","):
                 for rep in range(a.reps):
+                    if a.resume and (model, profile, framing, rep) in done:
+                        continue
                     left = remaining_usd()
                     if left < a.floor_usd or start - left > a.cap_usd:
                         print(
