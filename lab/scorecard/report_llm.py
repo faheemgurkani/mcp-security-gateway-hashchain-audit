@@ -1,9 +1,12 @@
-"""Render lab/results/llm.json into docs/results/scorecard-llm.md.
+"""Render a real-LLM results file into a markdown scorecard.
 
-Aggregates the real-LLM runs by (profile, framing): how often the forbidden
+    uv run python -m lab.scorecard.report_llm [--in llm.json] [--out scorecard-llm.md]
+
+Aggregates the runs by (model, profile, framing): how often the forbidden
 action executed, and how often the audit log was tampered without detection.
 """
 
+import argparse
 import json
 from collections import defaultdict
 from pathlib import Path
@@ -14,7 +17,11 @@ TAMPER = {"none": "🛡️", "detected": "🔎", "undetected": "❌"}
 
 
 def main() -> None:
-    src = ROOT / "lab/results/llm.json"
+    ap = argparse.ArgumentParser()
+    ap.add_argument("--in", dest="infile", default="llm.json")
+    ap.add_argument("--out", dest="outfile", default="scorecard-llm.md")
+    args = ap.parse_args()
+    src = ROOT / "lab/results" / args.infile
     runs = json.loads(src.read_text())["runs"]
     by: dict[tuple[str, str, str], list[dict]] = defaultdict(list)
     for r in runs:
@@ -91,10 +98,10 @@ def main() -> None:
         "primed agent may well do better. The scripted scorecard is the upper bound on what the "
         "gateway must withstand; this is a lower bound on what a modest agent actually does.",
         "",
-        "See `lab/results/llm.json` for full transcripts.",
+        f"See `lab/results/{args.infile}` for full transcripts.",
     ]
 
-    out = ROOT / "docs/results/scorecard-llm.md"
+    out = ROOT / "docs/results" / args.outfile
     out.write_text("\n".join(lines))
     print(f"wrote {out}  (${total_cost:.4f}, {len(runs)} runs)")
 

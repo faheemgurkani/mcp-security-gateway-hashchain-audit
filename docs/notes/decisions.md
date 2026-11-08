@@ -64,3 +64,8 @@ Format per entry: **ID · date · status**, then Context / Options / Decision / 
 **Context:** M8 scores third-party gateways, which raises disclosure questions.
 **Decision:** (1) external gateways are driven in their native transport (stdio proxies run as a subprocess), not forced into the HTTP slot; attacks that don't apply to a transport are documented, not faked. (2) Results are framed as a **capability comparison**, never a vulnerability claim, unless a gateway fails a guarantee it actually makes — in which case contact the maintainer privately before any public writeup. Record each gateway's version.
 **Rationale:** honest, reproducible comparison; respects maintainers of responsibly-scoped tools; avoids overclaiming.
+
+### D-014 · 2026-11-09 · accepted
+**Context:** owner asked to test the latest open-weight models, especially those claiming stronger safeguards.
+**Decision:** test five — `openai/gpt-oss-safeguard-20b` (the only open, tool-capable model advertising a safeguard focus) plus the newest flagships from four other vendors (kimi-k3.1-pro, deepseek-v4.1-flash-1017, qwen3.8-flash, glm-5.3) — into a separate results file, keeping the gpt-oss-120b baseline intact. Budget guard cap $6 / floor $4.
+**Rationale:** covers both "most recent" and "most safety-oriented"; vendor diversity; a separate file keeps the baseline reproducible and the new run re-runnable.

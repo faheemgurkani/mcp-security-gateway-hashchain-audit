@@ -8,7 +8,7 @@
 - [x] M4: Reference gateway proxy
 - [x] M5: Lab infrastructure
 - [x] M6: Attack harness (scripted)
-- [x] M7: Real-agent mode
+- [x] M7: Real-agent mode (gpt-oss-120b baseline + M7b: 5 latest/safeguard models)
 - [x] M8: Adapters and scorecard
 - [x] M9: Write-up
 
