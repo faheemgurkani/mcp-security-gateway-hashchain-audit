@@ -5,7 +5,7 @@
 - [x] M1: Project tooling
 - [x] M2: Audit core
 - [x] M3: Policy, validation and identity
-- [ ] M4: Reference gateway proxy
+- [x] M4: Reference gateway proxy
 - [ ] M5: Lab infrastructure
 - [ ] M6: Attack harness (scripted)
 - [ ] M7: Real-agent mode
