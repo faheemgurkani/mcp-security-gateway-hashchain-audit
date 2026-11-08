@@ -2,8 +2,8 @@
 
 ## Status
 - [x] Step 0: Documentation update
-- [ ] M1: Project tooling
-- [ ] M2: Audit core
+- [x] M1: Project tooling
+- [x] M2: Audit core
 - [ ] M3: Policy, validation and identity
 - [ ] M4: Reference gateway proxy
 - [ ] M5: Lab infrastructure
