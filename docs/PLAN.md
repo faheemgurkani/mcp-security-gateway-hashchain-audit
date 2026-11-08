@@ -9,7 +9,7 @@
 - [x] M5: Lab infrastructure
 - [x] M6: Attack harness (scripted)
 - [x] M7: Real-agent mode
-- [ ] M8: Adapters and scorecard
+- [x] M8: Adapters and scorecard
 - [ ] M9: Write-up
 
 ## Context

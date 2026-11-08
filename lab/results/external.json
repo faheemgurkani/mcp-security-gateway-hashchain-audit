@@ -1,0 +1,48 @@
+{
+  "gateway": "mcp-gate-policy",
+  "transport": "stdio",
+  "results": [
+    {
+      "id": "A7",
+      "title": "Impersonate admin (goal: admin access via request field)",
+      "execution": "blocked",
+      "evidence": "no forbidden/malformed call reached the tool server"
+    },
+    {
+      "id": "A8",
+      "title": "Confused deputy (user calls admin tool)",
+      "execution": "blocked",
+      "evidence": "no forbidden/malformed call reached the tool server"
+    },
+    {
+      "id": "A9",
+      "title": "Smuggle / malformed parameters",
+      "execution": "undetected",
+      "evidence": "executed: ['crm.update', 'crm.lookup']"
+    },
+    {
+      "id": "A10",
+      "title": "Rug pull (tool definition changes)",
+      "execution": "undetected",
+      "evidence": "executed: ['crm.lookup']"
+    },
+    {
+      "id": "A1",
+      "title": "Edit a log entry",
+      "tampering": "detected",
+      "evidence": "clean verify ok=True; after tamper: TAMPER DETECTED: hash mismatch at line 1 (seq 0)"
+    },
+    {
+      "id": "A2",
+      "title": "Delete a log entry",
+      "tampering": "detected",
+      "evidence": "clean verify ok=True; after tamper: TAMPER DETECTED: seq gap at line 1: 1 != 0"
+    },
+    {
+      "id": "A3",
+      "title": "Truncate the log tail",
+      "tampering": "undetected",
+      "evidence": "clean verify ok=True; after tamper: OK: chain valid: 1 records"
+    }
+  ]
+}

@@ -343,6 +343,15 @@ wheels = [
 ]
 
 [[package]]
+name = "mcp-gate-policy"
+version = "0.3.2"
+source = { registry = "https://pypi.org/simple" }
+sdist = { url = "https://files.pythonhosted.org/packages/59/fc/b8b9f5b95dc3e88ffc05055c5bf5003798ea5341488c8a79921871f0e60e/mcp_gate_policy-0.3.2.tar.gz", hash = "sha256:849db12a156a209ea20b13e6ad5b2259952f847b60269325b49cc00f93717b0b", size = 44715, upload-time = "2026-08-07T06:48:10.742Z" }
+wheels = [
+    { url = "https://files.pythonhosted.org/packages/3b/02/4b8ede5a1f2e0579a1d9bc9b3feb19a594c0ca1caf673aa946033f22dd9d/mcp_gate_policy-0.3.2-py3-none-any.whl", hash = "sha256:92130058cc0b9417234124f08e37194372641d0242d88ae8bd760b0558110428", size = 44527, upload-time = "2026-08-07T06:48:09.544Z" },
+]
+
+[[package]]
 name = "mcp-gateway-lab"
 version = "0.1.0"
 source = { editable = "." }
@@ -355,6 +364,11 @@ dependencies = [
     { name = "uvicorn" },
 ]
 
+[package.optional-dependencies]
+external = [
+    { name = "mcp-gate-policy" },
+]
+
 [package.dev-dependencies]
 dev = [
     { name = "pytest" },
@@ -365,12 +379,14 @@ dev = [
 [package.metadata]
 requires-dist = [
     { name = "mcp", specifier = ">=2.3,<3" },
+    { name = "mcp-gate-policy", marker = "extra == 'external'", specifier = ">=0.3,<0.4" },
     { name = "pydantic", specifier = ">=2.7" },
     { name = "pyyaml", specifier = ">=6" },
     { name = "rfc8785", specifier = ">=0.1.4" },
     { name = "typer", specifier = ">=0.12" },
     { name = "uvicorn", specifier = ">=0.30" },
 ]
+provides-extras = ["external"]
 
 [package.metadata.requires-dev]
 dev = [

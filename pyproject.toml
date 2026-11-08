@@ -17,6 +17,11 @@ dependencies = [
 [project.scripts]
 mcp-gateway = "mcp_gateway.cli:app"
 
+[project.optional-dependencies]
+external = [
+    "mcp-gate-policy>=0.3,<0.4",
+]
+
 [dependency-groups]
 dev = ["pytest>=8", "pytest-asyncio>=0.24", "ruff>=0.6"]
 

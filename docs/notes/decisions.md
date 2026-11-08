@@ -59,3 +59,8 @@ Format per entry: **ID · date · status**, then Context / Options / Decision / 
 **Context:** the real-LLM runs showed the agent never even discovered `admin.delete_user`, because a user session's `tools/list` is role-filtered.
 **Decision:** keep tool-list filtering by role as a first-class control, not just call-time authorization, and report it as defence in depth. Keep the real-LLM scorecard as a *lower bound* alongside the scripted *upper bound*, rather than replacing one with the other.
 **Rationale:** hiding a tool's existence reduces what an agent can target; measuring both bounds is more honest than reporting only the strongest attacker or only a given model.
+
+### D-013 · 2026-11-09 · accepted
+**Context:** M8 scores third-party gateways, which raises disclosure questions.
+**Decision:** (1) external gateways are driven in their native transport (stdio proxies run as a subprocess), not forced into the HTTP slot; attacks that don't apply to a transport are documented, not faked. (2) Results are framed as a **capability comparison**, never a vulnerability claim, unless a gateway fails a guarantee it actually makes — in which case contact the maintainer privately before any public writeup. Record each gateway's version.
+**Rationale:** honest, reproducible comparison; respects maintainers of responsibly-scoped tools; avoids overclaiming.
