@@ -7,3 +7,6 @@ dist/
 logs/
 .pytest_cache/
 CLAUDE.md
+anchor/
+*.jsonl
+.ruff_cache/
