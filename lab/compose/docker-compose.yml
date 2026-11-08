@@ -21,6 +21,7 @@ services:
       DEMO_LEDGER: /var/lib/tools/ledger.jsonl
       DEMO_UPSTREAM_TOKEN_FILE: /run/lab/upstream_token
       DEMO_RUG_PULL_AFTER: ${DEMO_RUG_PULL_AFTER:-0}
+      DEMO_INJECT: ${DEMO_INJECT:-0}
     volumes:
       - ledger:/var/lib/tools
       - ../.run/tools:/run/lab:ro

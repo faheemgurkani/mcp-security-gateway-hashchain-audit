@@ -54,3 +54,8 @@ Format per entry: **ID · date · status**, then Context / Options / Decision / 
 ### D-011 · 2026-11-09 · accepted
 **Decision:** the scripted attacker is the **strongest one the lab can justify**. It discovers targets itself (filesystem and `/proc` search, never handed paths). If it finds the key, it stops the gateway, rewrites the log with a recomputed chain and anchor, fills time gaps with forged heartbeats, and restarts the gateway with its original command line.
 **Rationale:** a weak attacker makes defences look better than they are. The first colocated run showed truncation "detected" only because of an incidental time gap; a key-holding attacker can trivially forge heartbeats, so we model that.
+
+### D-012 · 2026-11-09 · accepted
+**Context:** the real-LLM runs showed the agent never even discovered `admin.delete_user`, because a user session's `tools/list` is role-filtered.
+**Decision:** keep tool-list filtering by role as a first-class control, not just call-time authorization, and report it as defence in depth. Keep the real-LLM scorecard as a *lower bound* alongside the scripted *upper bound*, rather than replacing one with the other.
+**Rationale:** hiding a tool's existence reduces what an agent can target; measuring both bounds is more honest than reporting only the strongest attacker or only a given model.
