@@ -17,3 +17,9 @@ A running log of what was learned while building and testing: surprises, SDK qui
   - **The anchor is the only defence against clean truncation.** Test `test_truncation_only_caught_by_anchor` shows that a log cut at an entry boundary verifies fine without it.
   - **HMAC limitation:** verifying needs the same secret key as writing, so third parties can't verify without being able to forge. Ed25519 signatures would fix this (afr does that); noted as a later upgrade.
   - Writes use `O_APPEND` and `fsync` per entry. Any OS error raises `AuditWriteError` so the proxy fails closed.
+- 2026-11-09 [M3] Policy, validation and identity:
+  - **Schemas are hand-written Pydantic models per tool, with `extra="forbid", strict=True`.** "strict" matters: without it Pydantic would coerce `1234` to `"1234"`. A tool with no registered schema is denied, so adding a tool upstream doesn't silently widen the attack surface. Trade-off: every tool needs a model. Generating models from the upstream JSON schema would be more generic, but then a rug-pulled schema would be trusted. Pinning covers part of that.
+  - The policy uses `fnmatchcase` patterns (`crm.*`). A test makes sure `crmX.lookup` doesn't match `crm.*`.
+  - The session registry stores **SHA-256 of tokens**, never plain tokens, so reading the gateway config doesn't hand out credentials.
+  - Impersonation fields (`role`, `as_user`, …) are rejected by the strict schema *and* named separately, so the log can record the attempt as `impersonation_attempt` rather than as a generic validation error. That matters for the scorecard (A7: "blocked + logged").
+  - Pinning quarantines both changed definitions and **new, unpinned tools** that appear after start.

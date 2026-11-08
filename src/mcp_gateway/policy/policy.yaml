@@ -1,0 +1,6 @@
+# Default deny: a role may call only tools matching its allow patterns.
+roles:
+  user:
+    allow: ["crm.*"]
+  admin:
+    allow: ["crm.*", "admin.*"]

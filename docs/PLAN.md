@@ -4,7 +4,7 @@
 - [x] Step 0: Documentation update
 - [x] M1: Project tooling
 - [x] M2: Audit core
-- [ ] M3: Policy, validation and identity
+- [x] M3: Policy, validation and identity
 - [ ] M4: Reference gateway proxy
 - [ ] M5: Lab infrastructure
 - [ ] M6: Attack harness (scripted)
