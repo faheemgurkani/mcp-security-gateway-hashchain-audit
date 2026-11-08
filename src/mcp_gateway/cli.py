@@ -60,6 +60,10 @@ def serve(
     port: int = 8000,
     heartbeat: float = 5.0,
     upstream_env: list[str] = typer.Option([], help="KEY=VALUE passed to the tool server."),
+    upstream_token_file: Path | None = typer.Option(
+        None, help="Bearer token the gateway presents to an HTTP tool server."
+    ),
+    allowed_host: list[str] = typer.Option([], help="Accepted Host headers, e.g. gateway:*"),
 ):
     """Run the reference gateway (Streamable HTTP at /mcp)."""
     import uvicorn
@@ -73,6 +77,8 @@ def serve(
         chain=AuditChain(log, read_key(key_file), FileAnchor(anchor) if anchor else None),
         heartbeat_s=heartbeat,
         upstream_env=dict(kv.split("=", 1) for kv in upstream_env) or None,
+        upstream_token=upstream_token_file.read_text().strip() if upstream_token_file else None,
+        allowed_hosts=allowed_host or None,
     )
     uvicorn.run(build_app(cfg), host=host, port=port, log_level="warning")
 

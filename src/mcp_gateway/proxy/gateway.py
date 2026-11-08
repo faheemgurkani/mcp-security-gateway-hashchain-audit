@@ -17,8 +17,11 @@ from dataclasses import dataclass
 from typing import Any
 
 import anyio
+import httpx2
 from mcp import Client, StdioServerParameters
+from mcp.client.streamable_http import streamable_http_client
 from mcp.server import Server, ServerRequestContext
+from mcp.server.transport_security import TransportSecuritySettings
 from mcp.types import (
     CallToolRequestParams,
     CallToolResult,
@@ -45,6 +48,8 @@ class GatewayConfig:
     chain: AuditChain
     heartbeat_s: float = 5.0
     upstream_env: dict[str, str] | None = None
+    upstream_token: str | None = None  # gateway's own credential to the tool zone
+    allowed_hosts: list[str] | None = None  # Host-header allowlist (DNS-rebinding protection)
 
 
 def _deny(reason: str) -> CallToolResult:
@@ -76,9 +81,7 @@ class Gateway:
     # ---- lifecycle -------------------------------------------------------
     @contextlib.asynccontextmanager
     async def running(self) -> AsyncIterator["Gateway"]:
-        argv = shlex.split(self.cfg.upstream_command)
-        params = StdioServerParameters(command=argv[0], args=argv[1:], env=self.cfg.upstream_env)
-        async with Client(params) as upstream:
+        async with Client(self._upstream_transport()) as upstream:
             self.upstream = upstream
             tools = (await upstream.list_tools()).tools
             self._tools = {t.name: t for t in tools}
@@ -99,6 +102,20 @@ class Gateway:
                 finally:
                     tg.cancel_scope.cancel()
             self.upstream = None
+
+    def _upstream_transport(self) -> Any:
+        """stdio child process, or a Streamable HTTP tool server in the tool zone."""
+        cmd = self.cfg.upstream_command
+        if cmd.startswith(("http://", "https://")):
+            headers = (
+                {"Authorization": f"Bearer {self.cfg.upstream_token}"}
+                if self.cfg.upstream_token
+                else {}
+            )
+            http = httpx2.AsyncClient(headers=headers, timeout=httpx2.Timeout(30, read=300))
+            return streamable_http_client(cmd, http_client=http)
+        argv = shlex.split(cmd)
+        return StdioServerParameters(command=argv[0], args=argv[1:], env=self.cfg.upstream_env)
 
     # ---- helpers ---------------------------------------------------------
     def _log(self, type_: str, payload: dict[str, Any], principal: Principal | None) -> None:
@@ -197,7 +214,14 @@ def build_app(cfg: GatewayConfig) -> Starlette:
         on_list_tools=gateway.list_tools,
         on_call_tool=gateway.call_tool,
     )
-    app = server.streamable_http_app(host="0.0.0.0")
+    security = (
+        TransportSecuritySettings(
+            enable_dns_rebinding_protection=True, allowed_hosts=cfg.allowed_hosts
+        )
+        if cfg.allowed_hosts
+        else None
+    )
+    app = server.streamable_http_app(host="0.0.0.0", transport_security=security)
     inner_lifespan = app.router.lifespan_context
 
     @contextlib.asynccontextmanager

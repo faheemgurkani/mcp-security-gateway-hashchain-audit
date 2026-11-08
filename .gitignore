@@ -10,3 +10,5 @@ CLAUDE.md
 anchor/
 *.jsonl
 .ruff_cache/
+lab/.run/
+lab/results/raw/

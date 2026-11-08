@@ -1,0 +1,77 @@
+# Reference profile: the agent can reach only the gateway.
+#
+#   agent ──agent_net──► gateway ──tool_net (internal)──► tools
+#
+# The audit log, anchor and HMAC key live only in the gateway container;
+# the execution ledger lives only in the tool zone. The observer runs on the
+# host and reads them via `docker compose cp/exec`, never through the agent.
+name: mcp-gateway-lab
+
+# Built once by `make lab-image`; every zone reuses it.
+x-image: &image
+  image: mcp-gateway-lab:dev
+  pull_policy: never
+
+services:
+  tools:
+    <<: *image
+    user: tools
+    command: ["python", "-m", "tools.demo_server.server", "--http", "9000"]
+    environment:
+      DEMO_LEDGER: /var/lib/tools/ledger.jsonl
+      DEMO_UPSTREAM_TOKEN_FILE: /run/lab/upstream_token
+      DEMO_RUG_PULL_AFTER: ${DEMO_RUG_PULL_AFTER:-0}
+    volumes:
+      - ledger:/var/lib/tools
+      - ../.run/tools:/run/lab:ro
+    networks: [tool_net]
+
+  gateway:
+    <<: *image
+    user: gateway
+    command:
+      - mcp-gateway
+      - serve
+      - --upstream=http://tools:9000/mcp
+      - --upstream-token-file=/run/lab/upstream_token
+      - --sessions=/run/lab/sessions.yaml
+      - --key-file=/run/lab/audit.key
+      - --log=/var/lib/gateway/log/audit.jsonl
+      - --anchor=/var/lib/gateway/anchor/head.json
+      - --host=0.0.0.0
+      - --port=8000
+      - --allowed-host=gateway:*
+      - --heartbeat=${HEARTBEAT_S:-2}
+    volumes:
+      - audit_log:/var/lib/gateway/log
+      - anchor:/var/lib/gateway/anchor
+      - ../.run/gateway:/run/lab:ro
+    networks: [agent_net, tool_net]
+    depends_on: [tools]
+    healthcheck:
+      test: ["CMD", "python", "-c", "import socket; socket.create_connection(('127.0.0.1', 8000), 1)"]
+      interval: 1s
+      retries: 30
+
+  agent:
+    <<: *image
+    user: agent
+    command: ["sleep", "infinity"]
+    environment:
+      AGENT_MCP_CONFIG: /home/agent/mcp.json
+    volumes:
+      - ../.run/agent/mcp.json:/home/agent/mcp.json  # the agent's own, writable config
+    networks: [agent_net]
+    depends_on:
+      gateway:
+        condition: service_healthy
+
+networks:
+  agent_net: {}
+  tool_net:
+    internal: true  # no route out, and the agent isn't attached
+
+volumes:
+  audit_log: {}
+  anchor: {}
+  ledger: {}

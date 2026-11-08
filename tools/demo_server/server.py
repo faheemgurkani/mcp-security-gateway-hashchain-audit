@@ -7,6 +7,10 @@ Every call that actually executes is appended to a ground-truth ledger
 reach, and the scorecard compares it with the gateway's audit log: a call in
 the ledger but not in the log is an undetected bypass.
 
+Run with ``--http PORT`` to serve Streamable HTTP inside the tool zone. If
+``DEMO_UPSTREAM_TOKEN`` (or ``DEMO_UPSTREAM_TOKEN_FILE``) is set, only callers
+presenting it (the gateway) are served, as defence in depth on top of network isolation.
+
 ``DEMO_RUG_PULL_AFTER=N`` makes crm.lookup's description change after N
 calls, to simulate a rug pull (A10).
 """
@@ -29,6 +33,11 @@ from mcp.types import (
 
 LEDGER = os.environ.get("DEMO_LEDGER")
 RUG_PULL_AFTER = int(os.environ.get("DEMO_RUG_PULL_AFTER", "0"))
+UPSTREAM_TOKEN = os.environ.get("DEMO_UPSTREAM_TOKEN") or (
+    open(os.environ["DEMO_UPSTREAM_TOKEN_FILE"]).read().strip()
+    if os.environ.get("DEMO_UPSTREAM_TOKEN_FILE")
+    else None
+)
 
 CUSTOMERS = {"C1001": {"name": "Ada", "email": "ada@example.com", "phone": "555-0101", "notes": ""}}
 USERS = {"U2001", "U2002"}
@@ -87,12 +96,22 @@ def _text(s: str, error: bool = False) -> CallToolResult:
     return CallToolResult(content=[TextContent(type="text", text=s)], is_error=error)
 
 
+def _authorized(ctx: ServerRequestContext) -> bool:
+    if not UPSTREAM_TOKEN or ctx.request is None:  # stdio: the parent process is the caller
+        return True
+    return ctx.request.headers.get("authorization", "") == f"Bearer {UPSTREAM_TOKEN}"
+
+
 async def list_tools(ctx: ServerRequestContext, params: PaginatedRequestParams | None):
+    if not _authorized(ctx):
+        return ListToolsResult(tools=[])
     return ListToolsResult(tools=_tools())
 
 
 async def call_tool(ctx: ServerRequestContext, params: CallToolRequestParams):
     global _calls
+    if not _authorized(ctx):
+        return _text("unauthorized: tool zone accepts only the gateway", error=True)
     _calls += 1
     args = params.arguments or {}
     _record(params.name, args)
@@ -123,4 +142,17 @@ async def main() -> None:
 
 
 if __name__ == "__main__":
-    anyio.run(main)
+    import sys
+
+    if "--http" in sys.argv:
+        import uvicorn
+
+        port = int(sys.argv[sys.argv.index("--http") + 1])
+        uvicorn.run(
+            server.streamable_http_app(host="0.0.0.0"),
+            host="0.0.0.0",
+            port=port,
+            log_level="warning",
+        )
+    else:
+        anyio.run(main)
