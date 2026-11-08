@@ -10,7 +10,7 @@
 - [x] M6: Attack harness (scripted)
 - [x] M7: Real-agent mode
 - [x] M8: Adapters and scorecard
-- [ ] M9: Write-up
+- [x] M9: Write-up
 
 ## Context
 The research engineer validated D-003 and found that the original idea is already widely built. At least 15 open-source MCP gateways have policy enforcement, hash-chained logs and verifiers (mcp-gatekeeper, mcp-gate, afr, …). External anchoring is done by witness, agentprov and pipelock (Rekor). A non-bypassable design is done by AgentWall, Tracecat and averin. Attack suites exist too: MCPSEC (outside attacker) and agent-egress-bench (exfiltration).
