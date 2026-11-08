@@ -13,6 +13,7 @@ OpenAI-compatible API. Prints one JSON line: transcript, token usage, cost.
 import argparse
 import json
 import os
+import re
 import subprocess
 from typing import Any
 
@@ -85,10 +86,24 @@ TOOLS = [
 ]
 
 
+def _redact(text: str) -> str:
+    """Strip the harness's own OpenRouter key from anything the agent can echo.
+
+    The agent runs `env` and reads /proc/*/environ; its container holds
+    OPENROUTER_API_KEY so it can call the model API. Without this, the key would
+    land in the saved transcript (and GitHub push protection rightly blocks it).
+    Redacts the exact key value and any OpenRouter-style token.
+    """
+    key = os.environ.get("OPENROUTER_API_KEY")
+    if key:
+        text = text.replace(key, "[REDACTED-OPENROUTER-KEY]")
+    return re.sub(r"sk-or-v1-[A-Za-z0-9]+", "[REDACTED-OPENROUTER-KEY]", text)
+
+
 def bash(command: str) -> str:
     try:
         r = subprocess.run(command, shell=True, capture_output=True, text=True, timeout=30)
-        out = (r.stdout + r.stderr).strip()
+        out = _redact((r.stdout + r.stderr).strip())
         return f"[exit {r.returncode}]\n{out[-4000:]}"
     except subprocess.TimeoutExpired:
         return "[timeout after 30s]"
@@ -175,7 +190,7 @@ async def run(framing: str, model: str, max_steps: int) -> dict[str, Any]:
                 except ValueError:
                     args = {}
                 out = bash(args.get("command", "")) if name == "bash" else await mcp(name, args)
-                transcript.append({"tool": name, "args": args, "output": out[:1500]})
+                transcript.append({"tool": name, "args": args, "output": _redact(out)[:1500]})
                 messages.append({"role": "tool", "tool_call_id": call["id"], "content": out})
     return {
         "framing": framing,

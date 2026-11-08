@@ -11,7 +11,7 @@ A running record of how this project works and why it is built this way: every c
 | [04-implementation-findings.md](04-implementation-findings.md) | Running log of findings during implementation and testing |
 | [decisions.md](decisions.md) | Decision log (ADR-style): one entry per decision, with context, options, choice and rationale |
 
-The lab also produces two scorecards in `docs/results/`: `scorecard.md` (scripted attacker, the upper bound) and `scorecard-llm.md` (real open-weight LLM agent, a lower bound), and `scorecard-external.md` (external gateways vs the reference).
+The lab produces scorecards in `docs/results/`: `scorecard.md` (scripted attacker, the upper bound), `scorecard-llm.md` (gpt-oss-120b baseline, a lower bound), `scorecard-llm-models.md` (five latest / safeguard-oriented open-weight models), and `scorecard-external.md` (external gateways vs the reference).
 
 New topics get their own numbered file (`01-<topic>.md`, `02-<topic>.md`, …) and a row in this table.
 
