@@ -33,6 +33,10 @@ The owner's goals for the project:
   - [How an AI security engineer would use it in production work](#how-an-ai-security-engineer-would-use-it-in-production-work): six concrete uses
 - [Part 5 — What would make it valuable to others (done 2026-11-11)](#part-5--what-would-make-it-valuable-to-others-done-2026-11-11): the plan for the next stage, and what was built
   - [What was built (2026-11-11)](#what-was-built-2026-11-11): status of each step, and the tool for each Part 4 use
+  - [How it was tested](#how-it-was-tested): parity with the published results, installs from outside the repo
+  - [Licenses and the embargo](#licenses-and-the-embargo): what the licenses allow, and why the embargo stays
+  - [Problems fixed along the way](#problems-fixed-along-the-way): three bugs found while building it
+  - [Next step](#next-step): the owner's decision on the embargo
 
 ## Part 1 — The review (before gap closure)
 
@@ -495,3 +499,87 @@ Part 4's six uses now each have a concrete tool or document:
 | 6. Threat modelling | `docs/templates/agent-gateway-review.md` |
 
 The guide (`docs/GUIDE.md`) walks through all six.
+
+**In short:** the project is now usable by other people.
+
+- Anyone can install it straight from GitHub and score their own MCP gateway with one
+  command, or add it to their CI with the GitHub Action.
+- The work landed in 4 commits (`c3b1d05`, `30698fc`, `7bbf7ce`, `77c9679`).
+- All 72 tests pass, and GitHub CI is green on both jobs (tests, and the action gating the
+  reference gateway).
+
+In plain terms, each step works like this:
+
+- **Step 1, one-command scoring.**
+  - A gateway author writes a ~10-line YAML file describing how to start their gateway.
+  - Then `mcp-lab score my-gateway.yaml` runs every attack and prints one table.
+  - The "rewrite the log" attack (A12) needs no custom code: the tool works out the
+    gateway's hashing scheme from its own log.
+- **Step 2, argument rules from config.** Each tool is checked against rules from a
+  config file, or failing that the tool's own pinned schema, so the reference gateway
+  works with any tools. Extra fields are rejected by default.
+- **Part 4's six uses**, each with a concrete tool:
+  1. **Choosing a gateway:** `mcp-lab score`.
+  2. **Reviewing a deployment:** `mcp-lab check-deployment`. Run as the agent's user, it
+     says which risk profile the setup is in and what that loses.
+  3. **CI regression testing:** a GitHub Action anyone can add to their own CI; it fails
+     the build if an attack goes undetected. This repo's CI uses it on the reference
+     gateway.
+  4. **Red-teaming with AI models:** section 4 of the guide.
+  5. **Audits:** `mcp-lab inspect-log` says whether a log handed to you could have been
+     rewritten without a key.
+  6. **Threat modelling:** a fillable review template in
+     `docs/templates/agent-gateway-review.md`.
+
+### How it was tested
+
+- **Same results as before.**
+  - The YAML files for all five outside gateways give exactly the results already
+    published. This includes the embargoed one, which was checked privately.
+  - The tool recovered every gateway's hashing scheme without gateway-specific code:
+    - mcp-gate-policy and mcp-glp-audit-proxy: SHA-256 over RFC 8785 of the entry;
+    - shugo: the previous hash prepended;
+    - the embargoed one: a hash of the previous line.
+- **Works for an outside user.**
+  - A fresh wheel installs and runs outside the repo.
+  - Installing straight from GitHub works too
+    (`uv tool install git+https://github.com/faheemgurkani/mcp-security-gateway-hashchain-audit`).
+  - The action runs on GitHub's servers.
+  - The Docker lab still passes.
+
+### Licenses and the embargo
+
+All five scored gateways are open source:
+
+| License | Gateways |
+|---|---|
+| MIT | shugo, mcp-glp-audit-proxy (Community edition) |
+| Apache-2.0 | mcp-gate-policy, mcp-audit-proxy |
+| AGPL-3.0 | the embargoed one |
+
+None restricts benchmarking or publishing results. The project does not copy or
+redistribute any of their code: each is installed separately and run through its own
+commands. So the licenses allow publishing the results in a report or paper.
+
+The embargo stays anyway. It rests on this project's own disclosure policy (D-013), not
+on licensing. The technical report covers the five public gateways and only says that a
+sixth was withheld. Lifting the embargo is the owner's call; once lifted, that gateway is
+added to the public table and the report. Recorded as D-021.
+
+### Problems fixed along the way
+
+All of these are logged in `04-implementation-findings.md`.
+
+- **One gateway sends its "denied" replies in an older message format,** which crashed
+  the scorer partway through a run. The probe now also makes a call that should be
+  denied, and an unreadable reply is recorded instead of crashing the run.
+- **Paths containing spaces broke the gateway commands.** Placeholders are now
+  shell-quoted inside commands.
+- **`python -m mcp_gateway.cli` silently did nothing,** because it had no `__main__`
+  entry point. One has been added.
+
+### Next step
+
+The owner decides whether to lift the embargo on the held-back gateway. Maintainer
+outreach stays deferred until the owner chooses otherwise.
+

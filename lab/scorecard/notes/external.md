@@ -5,8 +5,8 @@ scored on controls it may or may not set out to provide, and the caveats above s
 
 - **Role and tool-name policy is table stakes.** Every gateway blocks the confused deputy
   (A8) and the admin call carrying a `role: admin` field (A7) with a default-deny allow list.
-- **Argument validation (A9) is rare.** Only the reference gateway (strict Pydantic,
-  `extra="forbid"`) and shugo reject `field=password` and a smuggled `role` field. shugo
+- **Argument validation (A9) is rare.** Only the reference gateway (a strict JSON Schema per
+  tool, closed to undeclared fields) and shugo reject `field=password` and a smuggled `role` field. shugo
   gets this from MCP SDK **v1**, whose server validates arguments against the tool server's
   own advertised schema; SDK **v2** dropped that check (notes/04, M1), so gateways built on
   v2 forward malformed calls unless they validate themselves. shugo's SDK-level rejections

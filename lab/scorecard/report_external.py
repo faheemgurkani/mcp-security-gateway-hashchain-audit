@@ -1,5 +1,5 @@
 """Render lab/results/external.json into docs/results/scorecard-external.md: every gateway
-scored by the same harness (lab/adapters/harness.py), one column each.
+scored by the same harness (src/mcp_lab/harness.py), one column each.
 
     uv run python -m lab.scorecard.report_external
 """
@@ -40,7 +40,7 @@ def main() -> None:
         "",
         "Every gateway wraps the same demo tool server, is configured as close to least "
         "privilege as it allows (a user may call `crm.*` only), and faces the same attacks "
-        "from the same harness (`lab/adapters/harness.py`). Outcomes come from evidence outside "
+        "from the same harness (`src/mcp_lab/harness.py`). Outcomes come from evidence outside "
         "the gateway: **execution** (A7–A10) from the tool server's own ledger, **tampering** "
         "(A1–A3, A12) from the gateway's *own* verifier run on a log the harness altered.",
         "",

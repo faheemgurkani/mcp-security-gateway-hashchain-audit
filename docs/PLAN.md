@@ -63,6 +63,9 @@ agent zone (untrusted)  --Streamable HTTP-->  gateway zone (trusted)  --stdio/pr
 Docker networks: `agent_net` (agent ↔ gateway only) and `tool_net` (gateway ↔ tools/anchor, internal). The agent container has no route to `tool_net`. The gateway runs as its own non-root UID, and its log volume is not mounted into the agent.
 
 ## Repo layout (restructure the scaffold)
+
+*Original plan, kept for history. Since then argument rules moved to JSON Schema in `validation/rules.py` (D-019), and the harness, demo tool server and `mcp-lab` CLI moved into the installable `src/mcp_lab/` package (D-020); `tools/demo_server/server.py` is now a shim. The current layout is in [ARCHITECTURE.md](ARCHITECTURE.md).*
+
 ```
 src/mcp_gateway/            # reference gateway (Stage 3 + 11)
   validation/schemas.py     # Pydantic models per tool, extra="forbid"
@@ -101,7 +104,7 @@ Keep the existing `src/mcp_gateway` package. Rename `rbac.py` to `engine.py` and
 **M3: Policy, validation and identity (Stage 3).**
 - `session.py`: the gateway issues an opaque token per session and maps it to a role from server-side config. Any `role`/`user` fields in arguments are ignored and logged as an impersonation attempt.
 - `engine.py`: default deny, role → tool allowlist, optional per-argument constraints.
-- `schemas.py`: Pydantic models with `extra="forbid"` and type checks.
+- `schemas.py`: Pydantic models with `extra="forbid"` and type checks. *(Later replaced by JSON Schema rules from config or the pinned tool schema: D-019.)*
 - Tool-description pinning: hash tool definitions at startup and refuse changed definitions (rug-pull defence).
 - Unit tests.
 
@@ -168,5 +171,6 @@ Each scenario declares its setup, the attacker action and the expected outcome. 
 - `make lab-up && uv run python -m lab.scorecard.run --profile reference`: every A1–A11 scenario reports blocked or detected; none reports undetected.
 - `uv run python -m lab.adapters.score --only reference`: every A1–A3, A7–A10 and A12 case is blocked or detected.
 - `./scripts/run_demo.sh`: the clean log verifies, each keyless tamper fails verification, and the keyed forgery passes.
+- `uv run mcp-lab score --reference examples/specs/reference.yaml`: nothing undetected (exit 0); the same gate runs in CI through `action.yml`.
 - `uv run mcp-gateway verify audit.jsonl --key-file audit.key --anchor head.json`: passes on a clean log and fails at the right seq after each tamper.
 - CI is green on GitHub after each push.
