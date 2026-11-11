@@ -28,7 +28,7 @@ authenticate → reject identity fields → pin check → policy → validate
 | `proxy/gateway.py` | Wires the pipeline; wraps the SDK's HTTP app lifespan around the upstream client, `proxy_start` entry and heartbeat task. |
 | `cli.py` | `keygen`, `issue-token`, `serve`, `verify`. |
 
-Design decisions and rationale: `docs/notes/decisions.md` (D-005…D-012).
+Design decisions and rationale: `docs/notes/decisions.md` (D-005…D-018).
 
 ## Test lab (`lab/`)
 
@@ -58,7 +58,15 @@ Never from the gateway's own claims. **Execution**: compare the tool zone's
 execution ledger with logged `call_request` entries. **Tampering**: compare
 before/after copies of the log and run the verifier. Each result is
 `blocked` / `detected` / `undetected`. Rules are unit-tested without Docker
-(`tests/harness/test_judge.py`).
+(`tests/harness/test_judge.py`). The gateway harness (`lab/adapters/`) applies
+the same principle without Docker: the tool server's ledger for execution, and
+each gateway's own verifier on a log the harness altered for tampering.
+
+## Demo scripts (`scripts/`)
+`run_demo.sh` runs the gateway without Docker, makes allowed and forbidden calls,
+and tampers with copies of the log. `tamper_log.py` performs the tampering:
+`edit`, `delete`, `truncate`, `spoof` (no key, so each is caught) and `forge`
+(with the key, so verification passes).
 
 ## Results
 - `docs/results/scorecard.md` — scripted attacker across three profiles (upper bound on what the gateway must withstand).

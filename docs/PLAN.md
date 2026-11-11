@@ -11,6 +11,8 @@
 - [x] M7: Real-agent mode (gpt-oss-120b baseline + M7b: 5 latest/safeguard models)
 - [x] M8: Adapters and scorecard
 - [x] M9: Write-up
+- [x] Gap closure (2026-11-11): no-Docker demo scripts; every LLM cell at 5 runs with confidence bounds; one harness scoring 6 gateways, plus attack A12 (D-015 to D-018). Review and results: `notes/05-project-review.md`.
+- [ ] Next stage: make the lab useful to others (one-command scoring, config-driven argument rules, maintainer outreach). See `notes/05-project-review.md`, Part 5.
 
 ## Context
 The research engineer validated D-003 and found that the original idea is already widely built. At least 15 open-source MCP gateways have policy enforcement, hash-chained logs and verifiers (mcp-gatekeeper, mcp-gate, afr, …). External anchoring is done by witness, agentprov and pipelock (Rekor). A non-bypassable design is done by AgentWall, Tracecat and averin. Attack suites exist too: MCPSEC (outside attacker) and agent-egress-bench (exfiltration).
@@ -163,6 +165,8 @@ Each scenario declares its setup, the attacker action and the expected outcome. 
 ## Verification
 - `uv run pytest`: unit tests (chain tamper types, canonicalization, policy, schemas, sessions) and an integration test (client → gateway → demo tools).
 - `uv run ruff check .`
-- `make lab-up && uv run python -m lab.scorecard run --gateway reference`: every A1–A11 scenario reports blocked or detected; none reports undetected.
-- `uv run mcp-gateway verify logs/audit.jsonl --anchor anchor/head.json`: passes on a clean log and fails at the right seq after each tamper.
+- `make lab-up && uv run python -m lab.scorecard.run --profile reference`: every A1–A11 scenario reports blocked or detected; none reports undetected.
+- `uv run python -m lab.adapters.score --only reference`: every A1–A3, A7–A10 and A12 case is blocked or detected.
+- `./scripts/run_demo.sh`: the clean log verifies, each keyless tamper fails verification, and the keyed forgery passes.
+- `uv run mcp-gateway verify audit.jsonl --key-file audit.key --anchor head.json`: passes on a clean log and fails at the right seq after each tamper.
 - CI is green on GitHub after each push.

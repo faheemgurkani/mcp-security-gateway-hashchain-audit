@@ -107,6 +107,7 @@ uv run python -m lab.adapters.score && uv run python -m lab.scorecard.report_ext
 - [Architecture](docs/ARCHITECTURE.md)
 - [Threat model](docs/threat-model/THREAT_MODEL.md)
 - [Design notes & decisions](docs/notes/) · [implementation plan](docs/PLAN.md)
+- [Project review and results in plain language](docs/notes/05-project-review.md)
 
 ## License
 MIT.

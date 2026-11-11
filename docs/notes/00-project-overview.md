@@ -1,6 +1,8 @@
 # 00: Project overview
 
 > Updated 2026-11-08 after the research validation (notes/03). The project is now an **agent-as-attacker test lab for MCP security gateways**. The repo name stays the same.
+>
+> **Status, 2026-11-11:** all milestones are done, and the gaps found in review are closed. For the current results and a plain-language review, see [05-project-review.md](05-project-review.md).
 
 ## The problem, in plain terms
 An AI agent uses **tools** (look up a customer, update the CRM, delete a user) through **MCP**, the Model Context Protocol, which sends JSON-RPC messages between agent and tool servers. The agent's instructions can come from untrusted text, so two things go wrong:
@@ -16,8 +18,8 @@ Lots of people have built locks. We're building the kit that tests whether a loc
 
 ```
 ┌──── agent zone (untrusted) ────┐
-│ attacker agent (scripted, later │
-│ a real LLM)                     │
+│ attacker agent (scripted, or a  │
+│ real LLM)                       │
 └──────────────┬──────────────────┘
                │ Streamable HTTP: the only route out
 ┌──────────────▼── gateway zone ──┐
@@ -34,15 +36,18 @@ observer (outside every zone): records what *really* happened → scorecard
 
 The four parts:
 1. **Reference gateway** (what we learn Stages 3 and 11 from): strict Pydantic validation, a default-deny role policy, identity fixed by the gateway, an HMAC hash-chained log with sequence numbers and heartbeats, its head anchored where the agent can't write, and fail-closed behaviour if the log can't be written.
-2. **Adapters:** thin wrappers that put existing gateways (mcp-gatekeeper, mcp-gate, …) into the same slot.
-3. **Attack harness:** scenarios A1–A11 in which the agent edits, deletes or truncates the log, removes the gateway from its config, kills it, calls tools directly, impersonates admin, smuggles parameters or swaps tool definitions.
+2. **Adapters:** one harness that runs the same attacks against any gateway. Five are published so far (the reference gateway, mcp-gate-policy, shugo, mcp-glp-audit-proxy, mcp-audit-proxy), and one more is held back pending private disclosure.
+3. **Attack harness:** scenarios A1–A12 in which the agent edits, deletes or truncates the log, removes the gateway from its config, kills it, calls tools directly, impersonates admin, smuggles parameters, swaps tool definitions, or rewrites the whole log and recomputes its hash chain (A12).
 4. **Observer and scorecard:** for each gateway and attack, was it **blocked**, **detected**, or did it get through **undetected**?
 
 ## Key concepts, briefly
 - **Hash chain / HMAC chain:** each log entry contains a fingerprint of the previous one. Change or delete one entry and every later fingerprint stops matching. With an HMAC the fingerprint also needs a secret key, so an attacker without the key can't recompute the chain.
+- **Keyless chain (A12):** a plain SHA-256 chain has no secret, so anyone who can edit the file can recompute every fingerprint after an edit. It proves the log is *consistent*, not that nobody altered it. Only a key or signature the agent can't reach closes this.
 - **Anchor:** a copy of the latest fingerprint kept somewhere the agent can't write. It catches *truncation*, where the attacker cuts entries off the end and the chain still looks valid.
 - **Heartbeats:** the gateway logs "I'm alive" every few seconds. A gap means the gateway was stopped, which catches *kill* attacks.
 - **Completeness vs integrity:** a chain proves that what was logged wasn't altered (integrity). Only an architecture the agent can't route around proves that everything was logged (completeness). Testing completeness is our novel part.
+- **Pinning (rug-pull defence):** the gateway fingerprints each tool's definition at startup and refuses calls to a tool whose definition later changes.
+- **Deployment profiles:** `reference` (gateway isolated from the agent), `breach` (agent can write the log but not reach the key), `colocated` (gateway runs as the agent's own user). The headline finding is that `colocated` loses every log attack.
 - **Fail closed:** if the gateway can't log a call, it refuses the call instead of letting it through unrecorded.
 
 ## How it maps to the learning stages
