@@ -46,7 +46,7 @@ agent zone (untrusted) ─HTTP─► gateway zone (trusted) ─internal net─�
 | `attacks/` | `actions.py` (agent-side attacker that discovers its own targets), `scenarios.py` (catalogue + judging rules). |
 | `observer/` | Ground truth from outside the zones: tool ledger, log + anchor copies, Docker events. |
 | `scorecard/` | `run.py` (scripted), `run_llm.py` (LLM, with a budget guard), `report*.py`. |
-| `adapters/` | External gateways in the same slot; `mcpgate/` scores `mcp-gate-policy`. |
+| `adapters/` | One harness for every gateway (`harness.py`), gateway definitions (`gateways.py`), runner (`score.py`). Contract in `adapters/README.md`. |
 
 ### Deployment profiles (D-010)
 - **reference**: isolated zones — gateway in its own container/UID; log, key, anchor out of agent reach; tools only via the gateway.
@@ -63,4 +63,4 @@ before/after copies of the log and run the verifier. Each result is
 ## Results
 - `docs/results/scorecard.md` — scripted attacker across three profiles (upper bound on what the gateway must withstand).
 - `docs/results/scorecard-llm.md` — real open-weight LLM agent (lower bound on what a modest agent does).
-- `docs/results/scorecard-external.md` — reference gateway vs. `mcp-gate-policy`.
+- `docs/results/scorecard-external.md` — five gateways (reference + four external) under the same harness.

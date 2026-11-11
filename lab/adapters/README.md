@@ -1,41 +1,89 @@
-# Adapters: scoring external MCP gateways
+# Adapters: scoring MCP gateways with one harness
 
-The lab scores any gateway that can sit in the same slot as the reference
-gateway. The **adapter contract** is small:
+`harness.py` runs the same attacks against every gateway; `gateways.py` describes each
+gateway; `score.py` runs them and writes `lab/results/external.json`, which
+`lab/scorecard/report_external.py` renders into `docs/results/scorecard-external.md`.
 
-A gateway is scorable if it can:
+```bash
+uv run python -m lab.adapters.score                       # every installed gateway
+uv run python -m lab.adapters.score --only reference,shugo
+uv run python -m lab.scorecard.report_external
+```
 
-1. **Mediate tool calls** between an MCP client (the agent) and an MCP tool
-   server, enforcing a policy (default-deny, role → allowed tools).
-2. **Bind identity to the session**, not read it from the request body.
-3. **Write an append-only audit log** the harness can read and check — either
-   with the gateway's own verifier, or with ours if the format matches.
+## The contract
 
-An adapter supplies three things:
+A gateway is scorable if it can **mediate tool calls** between an MCP client and an MCP
+tool server under a policy, and (for the log attacks) **write an audit log that some
+verifier can check**. An adapter is one `Gateway(...)` in `gateways.py`:
 
-- **placement**: how the gateway is started and where it sits relative to the
-  agent and the tool server (a Docker service in the HTTP slot, or a stdio
-  subprocess for stdio-only gateways);
-- **config**: policy, identity/token and key material in the gateway's format;
-- **judging hooks**: where its audit log is, and how to verify it (a command
-  or a format adapter), so outcomes are decided the same way for every
-  gateway — execution from the tool-zone ledger (ground truth), tampering from
-  the gateway's own integrity check.
+| field | what it supplies |
+|---|---|
+| `connect(dir, upstream_env)` | an MCP client session *through* the gateway, which wraps the demo tool server (`harness.UPSTREAM`) started with `upstream_env`; write the gateway's config into `dir` |
+| `log(dir)` | where its audit log ends up |
+| `verify(dir)` | its **own** integrity check → `(ok, message)`; `None` if it has none |
+| `forge(dir)` | A12: edit an entry and recompute the chain with its *published* algorithm, without any secret; `None` if there is no chain |
+| `dump(entry)` | how it serializes a log line, so edits look native |
+| `rug_flagged(dir)` | optional: did it raise a rug-pull alarm? (turns A10 into *detected*) |
+| `prefix` | how it renames upstream tools (e.g. `demo__`) |
+| `caveats` | what the gateway does not set out to do, shown under the table |
+
+Configure each gateway as close to least privilege as it allows: a user may call `crm.*`
+only, admin tools are denied, and its strongest audit option is on.
+
+## How outcomes are decided
+
+Never from the gateway's own claims about a call:
+
+- **Execution** (A7–A10): the demo tool server appends every call it *executes* to a
+  ledger. A forbidden call in the ledger is `undetected` (or `detected` for A10 if the
+  gateway raised an alarm); none is `blocked`.
+- **Tampering** (A1–A3, A12): the harness alters a copy of a real log the gateway wrote,
+  then runs the gateway's own verifier. Rejected is `detected`, accepted is `undetected`.
+  A1 is tried on a middle entry and on the newest one, and the worse result counts.
+
+A forger that gets a gateway's algorithm wrong produces a log its verifier rejects, so a
+mistake can only flatter the gateway, never wrong it.
 
 ## Transport reality
 
-Most published gateways (mcp-gate-policy, shugo, agent-sudo-mcp) are **stdio
-proxies**: the agent launches them as a subprocess and they wrap a stdio tool
-server. That is structurally the **colocated** profile — the gateway runs as
-the agent's own user, so the agent can edit its config, read its key, or kill
-it. Only a gateway with a real network/privilege boundary (the reference
-gateway's HTTP slot, or a gateway run as a separate user/container) can reach
-the `reference`/`breach` profiles. This is itself a finding: the common
-deployment shape of existing gateways is the weak one.
+Most published gateways are **stdio proxies**: the agent launches them as a subprocess,
+which is structurally the `colocated` profile. The agent can edit their config, read
+their files and run the tool server itself, so network-boundary attacks (A4–A6) are not
+repeated per gateway. Only a gateway with a real boundary (the reference gateway's HTTP
+slot, or any gateway run as a separate user/container) reaches `reference`/`breach`.
 
-## Current adapters
+## Installing the external gateways
 
-- [`mcpgate/`](mcpgate/) — `mcp-gate-policy` (PyPI), run as a stdio proxy.
-  A peer design: hash-chained audit, default-deny roles, its own `verify`.
+Each one goes into its own environment under `lab/.ext/` (git-ignored), never into the
+project's, and is pinned to the version that was scored:
 
-Install the extra first: `uv sync --extra external`.
+```bash
+uv sync --extra external                                   # mcp-gate-policy (PyPI)
+for spec in shugo==0.1.0 mcp-glp-audit-proxy==0.4.0; do    # PyPI, isolated venvs
+  n=${spec%%==*}; uv venv -p 3.12 "lab/.ext/$n"
+  uv pip install -p "lab/.ext/$n/bin/python" --only-binary :all: "$spec"
+done
+mkdir -p lab/.ext/mcp-audit-proxy && (cd lab/.ext/mcp-audit-proxy && npm init -y >/dev/null \
+  && npm install --ignore-scripts mcp-audit-proxy@0.1.0)   # Go binary via npm
+chmod +x lab/.ext/mcp-audit-proxy/node_modules/mcp-audit-proxy-*/bin/mcp-audit
+```
+
+`--ignore-scripts` is safe here (the package ships the binary, no postinstall download) but
+leaves it non-executable, hence the `chmod`.
+
+## Gateways scored
+
+| gateway | version | what it is | notes |
+|---|---|---|---|
+| reference | this repo | HTTP gateway: session identity, role policy, strict schemas, pinning, HMAC chain + anchor | |
+| [mcp-gate-policy](https://pypi.org/project/mcp-gate-policy/) | 0.3.2 | stdio proxy: roles via HMAC token, SHA-256 chain, `verify` | |
+| [shugo](https://github.com/aritraghosh01/shugo) | 0.1.0 | stdio proxy: policy-as-code, approvals, SHA-256 chain | no per-principal identity in v0.1 |
+| [mcp-glp-audit-proxy](https://github.com/antonio-castellon/mcp-glp-audit-proxy) | 0.4.0 | stdio/HTTPS proxy for GxP audit trails: roles, RFC 8785 + SHA-256 chain, `.head` sidecar | Community edition; needs the legacy handshake |
+| [mcp-audit-proxy](https://github.com/firatmio/mcp-audit-proxy) | 0.1.0 | Go flight recorder: per-client rules, rug-pull and poisoning detectors | no integrity claim |
+
+Checked and **not** scored, because they are not a proxy in front of an arbitrary MCP
+server: `mcp-gatekeeper` on PyPI (a CI quality gate; the npm package of that name is a
+coding-agent hook), `agent-flight-recorder` (agent debugging telemetry), `agent-sudo-mcp`
+(an MCP server exposing its own tools, not a proxy), `mcp-toolguard` (CI contracts),
+`intentgate` (SDK for a hosted service), `agentprov` (research framework). One more proxy
+was scored; its results are held back pending private disclosure (D-013).

@@ -69,3 +69,18 @@ Format per entry: **ID · date · status**, then Context / Options / Decision / 
 **Context:** owner asked to test the latest open-weight models, especially those claiming stronger safeguards.
 **Decision:** test five — `openai/gpt-oss-safeguard-20b` (the only open, tool-capable model advertising a safeguard focus) plus the newest flagships from four other vendors (kimi-k3.1-pro, deepseek-v4.1-flash-1017, qwen3.8-flash, glm-5.3) — into a separate results file, keeping the gpt-oss-120b baseline intact. Budget guard cap $6 / floor $4.
 **Rationale:** covers both "most recent" and "most safety-oriented"; vendor diversity; a separate file keeps the baseline reproducible and the new run re-runnable.
+
+### D-015 · 2026-11-11 · accepted
+**Context:** only one external gateway had been scored, with a one-off script, and the reference gateway's column in that comparison was hand-written.
+**Decision:** one shared harness (`lab/adapters/harness.py`) scores every gateway, the reference gateway included, through the same attacks; an adapter is a small `Gateway(...)` description. Add **A12, rewrite the log and recompute the chain with the gateway's published algorithm (no key)**, because it is the attack that separates keyed or signed logs from plain hash chains. Each external gateway is installed in its own environment under `lab/.ext/` and pinned to the version scored.
+**Rationale:** a measured reference column is more credible than a written one; a uniform harness makes the comparison fair and makes adding a gateway cheap; A12 tests the property that a "tamper-evident" log actually needs.
+
+### D-016 · 2026-11-11 · accepted
+**Context:** scoring more gateways turned up one whose measured behaviour differs from guarantees its documentation makes.
+**Decision:** apply D-013 strictly: that gateway's adapter (`lab/adapters/embargoed.py`) and results (`lab/results/raw/`) stay git-ignored, the public scorecard says only that one more gateway was scored, and the owner contacts the maintainer privately before anything about it is published.
+**Rationale:** responsible disclosure costs nothing here and protects both the maintainer's users and this project's credibility.
+
+### D-017 · 2026-11-11 · accepted
+**Context:** LLM-attacker evidence was 1–2 runs per cell.
+**Decision:** raise every cell to 5 runs (6 models x 3 profiles x 3 framings), report a one-sided 95% Clopper-Pearson upper bound per model, and keep hand-written observations in `lab/scorecard/notes/*.md`, re-checked against the transcripts, instead of inside the report generator. Budget: cap $5 for the top-up, floor $5 left on the key.
+**Rationale:** "0/N" means little without N; a bound states what the data supports. Prose inside a generator silently outlives the data it described.

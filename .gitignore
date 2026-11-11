@@ -13,3 +13,4 @@ anchor/
 lab/.run/
 lab/results/raw/
 lab/.ext/
+lab/adapters/embargoed.py

@@ -74,8 +74,31 @@ and the key.** In the colocated shape — how most stdio wrappers deploy — a
 misbehaving agent rewrites history and the verifier still says OK. Isolation is
 what stops attacks; signatures are what detect them when isolation partly fails.
 
-Full results, including a real open-weight LLM attacker and a comparison with
-the external gateway `mcp-gate-policy`, are in [`docs/results/`](docs/results/).
+Full results, including real open-weight LLM attackers (6 models), are in
+[`docs/results/`](docs/results/).
+
+### Other gateways, same attacks
+
+One harness ([`lab/adapters/`](lab/adapters/)) scores any MCP gateway on the
+same attacks and judges it by ground truth and its *own* verifier. Five so far:
+
+| | reference | mcp-gate-policy | shugo | mcp-glp-audit-proxy | mcp-audit-proxy |
+|---|---|---|---|---|---|
+| role / tool policy (A7, A8) | 🛡️ | 🛡️ | 🛡️ | 🛡️ | 🛡️ |
+| argument validation (A9) | 🛡️ | ❌ | 🛡️ | ❌ | ❌ |
+| rug pull (A10) | 🛡️ | ❌ | ❌ | ❌ | 🔎 |
+| log edit / delete (A1, A2) | 🔎 | 🔎 | 🔎 | 🔎 | ❌ |
+| log truncation (A3) | 🔎 | ❌ | ❌ | 🔎 | ❌ |
+| keyless rewrite (A12) | 🔎 | ❌ | ❌ | ❌ | ❌ |
+
+A hash chain without a secret proves the log is *consistent*, not that it is
+*unaltered*: whoever can write the file can recompute it. See
+[`scorecard-external.md`](docs/results/scorecard-external.md) for caveats; this
+is a capability comparison, not a list of vulnerabilities.
+
+```bash
+uv run python -m lab.adapters.score && uv run python -m lab.scorecard.report_external
+```
 
 ## Documentation
 - [Architecture](docs/ARCHITECTURE.md)

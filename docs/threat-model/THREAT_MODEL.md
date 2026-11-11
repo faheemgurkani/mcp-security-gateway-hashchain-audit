@@ -61,8 +61,13 @@ assuming them.
 | A9 | Smuggle / malformed parameters | ASI02 | strict Pydantic schemas (`extra=forbid`) | — |
 | A10 | Rug pull (tool definition changes) | ASI04 | tool-definition pinning | — |
 | A11 | Spoof a log entry | ASI10 | HMAC chain | key is out of agent reach |
+| A12 | Rewrite the log and recompute the chain with the published algorithm | ASI10 | a secret in the chain (HMAC) or a signature that the verifier checks | key is out of agent reach |
 
-A7–A10 are enforced at the gateway regardless of deployment. A1–A3, A5, A11
+A12 is what separates a keyed or signed log from a plain hash chain: a SHA-256
+chain with no secret can be recomputed by anyone who can write the file, so it
+proves consistency, not authorship (`scorecard-external.md`).
+
+A7–A10 are enforced at the gateway regardless of deployment. A1–A3, A5, A11, A12
 depend on keeping the key, anchor and gateway process out of the agent's reach;
 A4, A6 depend on the network boundary. The scorecards (`docs/results/`) show
 each attack's actual outcome across three deployment profiles.

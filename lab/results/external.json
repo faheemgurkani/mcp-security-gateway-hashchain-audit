@@ -1,48 +1,337 @@
 {
-  "gateway": "mcp-gate-policy",
-  "transport": "stdio",
-  "results": [
+  "gateways": [
     {
-      "id": "A7",
-      "title": "Impersonate admin (goal: admin access via request field)",
-      "execution": "blocked",
-      "evidence": "no forbidden/malformed call reached the tool server"
+      "gateway": "reference",
+      "version": "this repo",
+      "transport": "http",
+      "caveats": [
+        "Run here with the key and anchor beside the log, as an attacker would find them in the colocated profile minus the key; see scorecard.md for isolation."
+      ],
+      "results": [
+        {
+          "id": "A7",
+          "title": "Impersonate admin via a request field",
+          "kind": "execution",
+          "outcome": "blocked",
+          "evidence": "nothing forbidden executed (client saw ['error'])"
+        },
+        {
+          "id": "A8",
+          "title": "Confused deputy (user calls admin tool)",
+          "kind": "execution",
+          "outcome": "blocked",
+          "evidence": "nothing forbidden executed (client saw ['error'])"
+        },
+        {
+          "id": "A9",
+          "title": "Smuggle / malformed parameters",
+          "kind": "execution",
+          "outcome": "blocked",
+          "evidence": "nothing forbidden executed (client saw ['error', 'error'])"
+        },
+        {
+          "id": "A10",
+          "title": "Rug pull (tool definition changes)",
+          "kind": "execution",
+          "outcome": "blocked",
+          "evidence": "changed tool refused (client saw ['ok', 'ok', 'ok', 'error'])"
+        },
+        {
+          "id": "A1",
+          "title": "Edit a log entry (middle, then newest)",
+          "kind": "tampering",
+          "outcome": "detected",
+          "evidence": "10 entries; verifier: mac_mismatch at seq 5 | mac_mismatch at seq 9"
+        },
+        {
+          "id": "A2",
+          "title": "Delete a log entry",
+          "kind": "tampering",
+          "outcome": "detected",
+          "evidence": "10 entries; verifier: seq_gap at seq 3"
+        },
+        {
+          "id": "A3",
+          "title": "Truncate the log tail (drop the newest 2)",
+          "kind": "tampering",
+          "outcome": "detected",
+          "evidence": "10 entries; verifier: truncated at seq 7"
+        },
+        {
+          "id": "A12",
+          "title": "Rewrite and re-hash with the public algorithm (no key)",
+          "kind": "tampering",
+          "outcome": "detected",
+          "evidence": "10 entries; verifier: mac_mismatch at seq 0"
+        }
+      ],
+      "run_at": "2026-11-11T07:47:29+00:00"
     },
     {
-      "id": "A8",
-      "title": "Confused deputy (user calls admin tool)",
-      "execution": "blocked",
-      "evidence": "no forbidden/malformed call reached the tool server"
+      "gateway": "mcp-gate-policy",
+      "version": "0.3.2",
+      "transport": "stdio",
+      "caveats": [],
+      "results": [
+        {
+          "id": "A7",
+          "title": "Impersonate admin via a request field",
+          "kind": "execution",
+          "outcome": "blocked",
+          "evidence": "nothing forbidden executed (client saw ['denied'])"
+        },
+        {
+          "id": "A8",
+          "title": "Confused deputy (user calls admin tool)",
+          "kind": "execution",
+          "outcome": "blocked",
+          "evidence": "nothing forbidden executed (client saw ['denied'])"
+        },
+        {
+          "id": "A9",
+          "title": "Smuggle / malformed parameters",
+          "kind": "execution",
+          "outcome": "undetected",
+          "evidence": "executed: ['crm.update', 'crm.lookup']"
+        },
+        {
+          "id": "A10",
+          "title": "Rug pull (tool definition changes)",
+          "kind": "execution",
+          "outcome": "undetected",
+          "evidence": "changed tool executed with no alarm"
+        },
+        {
+          "id": "A1",
+          "title": "Edit a log entry (middle, then newest)",
+          "kind": "tampering",
+          "outcome": "detected",
+          "evidence": "5 entries; verifier: TAMPER DETECTED: hash mismatch at line 3 (seq 2) | TAMPER DETECTED: hash mismatch at line 5 (seq 4)"
+        },
+        {
+          "id": "A2",
+          "title": "Delete a log entry",
+          "kind": "tampering",
+          "outcome": "detected",
+          "evidence": "5 entries; verifier: TAMPER DETECTED: seq gap at line 3: 3 != 2"
+        },
+        {
+          "id": "A3",
+          "title": "Truncate the log tail (drop the newest 2)",
+          "kind": "tampering",
+          "outcome": "undetected",
+          "evidence": "5 entries; verifier: accepted it"
+        },
+        {
+          "id": "A12",
+          "title": "Rewrite and re-hash with the public algorithm (no key)",
+          "kind": "tampering",
+          "outcome": "undetected",
+          "evidence": "5 entries; verifier: accepted it"
+        }
+      ],
+      "run_at": "2026-11-11T07:47:32+00:00"
     },
     {
-      "id": "A9",
-      "title": "Smuggle / malformed parameters",
-      "execution": "undetected",
-      "evidence": "executed: ['crm.update', 'crm.lookup']"
+      "gateway": "shugo",
+      "version": "0.1.0",
+      "transport": "stdio",
+      "caveats": [
+        "v0.1 has no per-principal identity (on its v0.2 roadmap): the policy is per deployment, so A7/A8 test the deployment's allow list."
+      ],
+      "results": [
+        {
+          "id": "A7",
+          "title": "Impersonate admin via a request field",
+          "kind": "execution",
+          "outcome": "blocked",
+          "evidence": "nothing forbidden executed (client saw ['error'])"
+        },
+        {
+          "id": "A8",
+          "title": "Confused deputy (user calls admin tool)",
+          "kind": "execution",
+          "outcome": "blocked",
+          "evidence": "nothing forbidden executed (client saw ['error'])"
+        },
+        {
+          "id": "A9",
+          "title": "Smuggle / malformed parameters",
+          "kind": "execution",
+          "outcome": "blocked",
+          "evidence": "nothing forbidden executed (client saw ['error', 'error'])"
+        },
+        {
+          "id": "A10",
+          "title": "Rug pull (tool definition changes)",
+          "kind": "execution",
+          "outcome": "undetected",
+          "evidence": "changed tool executed with no alarm"
+        },
+        {
+          "id": "A1",
+          "title": "Edit a log entry (middle, then newest)",
+          "kind": "tampering",
+          "outcome": "detected",
+          "evidence": "5 entries; verifier: FAIL | FAIL"
+        },
+        {
+          "id": "A2",
+          "title": "Delete a log entry",
+          "kind": "tampering",
+          "outcome": "detected",
+          "evidence": "5 entries; verifier: FAIL"
+        },
+        {
+          "id": "A3",
+          "title": "Truncate the log tail (drop the newest 2)",
+          "kind": "tampering",
+          "outcome": "undetected",
+          "evidence": "5 entries; verifier: accepted it"
+        },
+        {
+          "id": "A12",
+          "title": "Rewrite and re-hash with the public algorithm (no key)",
+          "kind": "tampering",
+          "outcome": "undetected",
+          "evidence": "5 entries; verifier: accepted it"
+        }
+      ],
+      "run_at": "2026-11-11T07:47:35+00:00"
     },
     {
-      "id": "A10",
-      "title": "Rug pull (tool definition changes)",
-      "execution": "undetected",
-      "evidence": "executed: ['crm.lookup']"
+      "gateway": "mcp-glp-audit-proxy",
+      "version": "0.4.0",
+      "transport": "stdio",
+      "caveats": [
+        "Community edition (signed checkpoints are a Pro feature). Stdio identity comes from GLP_PRINCIPAL_* env set by whoever launches it."
+      ],
+      "results": [
+        {
+          "id": "A7",
+          "title": "Impersonate admin via a request field",
+          "kind": "execution",
+          "outcome": "blocked",
+          "evidence": "nothing forbidden executed (client saw ['error'])"
+        },
+        {
+          "id": "A8",
+          "title": "Confused deputy (user calls admin tool)",
+          "kind": "execution",
+          "outcome": "blocked",
+          "evidence": "nothing forbidden executed (client saw ['error'])"
+        },
+        {
+          "id": "A9",
+          "title": "Smuggle / malformed parameters",
+          "kind": "execution",
+          "outcome": "undetected",
+          "evidence": "executed: ['crm.update', 'crm.lookup']"
+        },
+        {
+          "id": "A10",
+          "title": "Rug pull (tool definition changes)",
+          "kind": "execution",
+          "outcome": "undetected",
+          "evidence": "changed tool executed with no alarm"
+        },
+        {
+          "id": "A1",
+          "title": "Edit a log entry (middle, then newest)",
+          "kind": "tampering",
+          "outcome": "detected",
+          "evidence": "10 entries; verifier: chain invalid | chain invalid"
+        },
+        {
+          "id": "A2",
+          "title": "Delete a log entry",
+          "kind": "tampering",
+          "outcome": "detected",
+          "evidence": "10 entries; verifier: chain invalid"
+        },
+        {
+          "id": "A3",
+          "title": "Truncate the log tail (drop the newest 2)",
+          "kind": "tampering",
+          "outcome": "detected",
+          "evidence": "10 entries; verifier: chain invalid"
+        },
+        {
+          "id": "A12",
+          "title": "Rewrite and re-hash with the public algorithm (no key)",
+          "kind": "tampering",
+          "outcome": "undetected",
+          "evidence": "10 entries; verifier: accepted it"
+        }
+      ],
+      "run_at": "2026-11-11T07:47:39+00:00"
     },
     {
-      "id": "A1",
-      "title": "Edit a log entry",
-      "tampering": "detected",
-      "evidence": "clean verify ok=True; after tamper: TAMPER DETECTED: hash mismatch at line 1 (seq 0)"
-    },
-    {
-      "id": "A2",
-      "title": "Delete a log entry",
-      "tampering": "detected",
-      "evidence": "clean verify ok=True; after tamper: TAMPER DETECTED: seq gap at line 1: 1 != 0"
-    },
-    {
-      "id": "A3",
-      "title": "Truncate the log tail",
-      "tampering": "undetected",
-      "evidence": "clean verify ok=True; after tamper: OK: chain valid: 1 records"
+      "gateway": "mcp-audit-proxy",
+      "version": "0.1.0",
+      "transport": "stdio",
+      "caveats": [
+        "A recorder with detectors, not a tamper-evident log: it does not claim log integrity, so A1-A3/A12 show the absence of that feature, not a defect."
+      ],
+      "results": [
+        {
+          "id": "A7",
+          "title": "Impersonate admin via a request field",
+          "kind": "execution",
+          "outcome": "blocked",
+          "evidence": "nothing forbidden executed (client saw ['denied'])"
+        },
+        {
+          "id": "A8",
+          "title": "Confused deputy (user calls admin tool)",
+          "kind": "execution",
+          "outcome": "blocked",
+          "evidence": "nothing forbidden executed (client saw ['denied'])"
+        },
+        {
+          "id": "A9",
+          "title": "Smuggle / malformed parameters",
+          "kind": "execution",
+          "outcome": "undetected",
+          "evidence": "executed: ['crm.update', 'crm.lookup']"
+        },
+        {
+          "id": "A10",
+          "title": "Rug pull (tool definition changes)",
+          "kind": "execution",
+          "outcome": "detected",
+          "evidence": "changed tool still executed, but the gateway raised an alarm"
+        },
+        {
+          "id": "A1",
+          "title": "Edit a log entry (middle, then newest)",
+          "kind": "tampering",
+          "outcome": "undetected",
+          "evidence": "no integrity check"
+        },
+        {
+          "id": "A2",
+          "title": "Delete a log entry",
+          "kind": "tampering",
+          "outcome": "undetected",
+          "evidence": "no integrity check"
+        },
+        {
+          "id": "A3",
+          "title": "Truncate the log tail (drop the newest 2)",
+          "kind": "tampering",
+          "outcome": "undetected",
+          "evidence": "no integrity check"
+        },
+        {
+          "id": "A12",
+          "title": "Rewrite and re-hash with the public algorithm (no key)",
+          "kind": "tampering",
+          "outcome": "undetected",
+          "evidence": "no integrity check"
+        }
+      ],
+      "run_at": "2026-11-11T07:47:41+00:00"
     }
   ]
 }
