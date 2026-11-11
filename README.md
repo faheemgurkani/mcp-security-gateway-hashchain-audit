@@ -37,6 +37,18 @@ uv run mcp-gateway serve --upstream "python -m tools.demo_server.server" \
 uv run mcp-gateway verify audit.jsonl --key-file audit.key --anchor head.json
 ```
 
+### Two-minute demo (no Docker)
+
+```bash
+./scripts/run_demo.sh
+```
+
+Starts the gateway, makes allowed and forbidden calls (confused deputy,
+impersonation, smuggled fields, forged token), verifies the log, then tampers
+with copies of it (`scripts/tamper_log.py`: edit, delete, truncate, spoof) and
+shows each one caught, and finally shows a key-holding attacker forging a log
+that still verifies.
+
 ## The lab
 
 Three Docker zones (agent / gateway / tools) with the agent isolated from the
