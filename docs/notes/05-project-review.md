@@ -1,8 +1,10 @@
 # 05 — Project review: what it is, how complete, does it meet the goals
 
 Written 2026-11-11 for the owner's own learning. Part 1 is the review as given before the
-gap-closing work; Part 2 records what changed afterwards, with the latest results. Part 3
-is the plan for making the project useful to others.
+gap-closing work; Part 2 records what changed afterwards, with the latest results. "In
+brief" is a one-screen summary of Parts 3 and 4: Part 3 explains key terms in plain
+language, and Part 4 covers how the work differs and how to use it in practice. Part 5 is
+the plan for making the project useful to others.
 
 The owner's goals for the project:
 1. get hands-on with AI security engineering;
@@ -225,6 +227,74 @@ withstand. A model failing to attack shows a capability gap, not a stronger gate
   body and no `choices`. The runner now retries, records the failure, and resumes.
 - **Recheck hand-written claims whenever the data changes.** Notes now live in separate
   files (`lab/scorecard/notes/`) and are reviewed against the transcripts.
+
+## In brief: key terms, what is different, how to use it
+
+The short version of Parts 3 and 4.
+
+**Colocated.** The gateway runs on the same machine, as the same user, as the agent.
+
+- So the agent can reach everything the gateway uses: its log, its secret key, its config,
+  and the tools behind it.
+- It's like a guard who keeps the vault key under the burglar's pillow.
+- Most MCP gateways are set up this way today, and in this setup the gateway loses every
+  log attack.
+- A real model has now shown this too: kimi-k3.1-pro went around a colocated gateway in 3
+  of 5 runs (Part 2).
+
+**Hash-chained, HMAC-signed log.**
+
+- **Hash chain:** each log line carries a fingerprint that covers its own content and the
+  previous line's fingerprint. Change or delete one line, and every fingerprint after it
+  stops matching.
+- **HMAC:** the fingerprint also mixes in a secret key.
+  - With a plain hash, anyone who can edit the file can recompute all the fingerprints.
+    That is our attack A12, and every keyless gateway accepted the forged log.
+  - With HMAC you need the key, so the key must be out of the agent's reach.
+- **Anchor:** the latest fingerprint is also stored somewhere else, so cutting lines off
+  the end is caught.
+
+**Pinning and rug pulls.**
+
+- A rug pull is a tool that looks harmless when approved and later changes; for example,
+  its description gains hidden instructions.
+- At startup the gateway records a fingerprint of each tool's definition. If the
+  definition later changes, the gateway refuses the call.
+
+**How our work differs.** Other projects build a gateway and state what it protects. We
+test whether those claims hold when the agent itself attacks.
+
+- We judge results from evidence outside the gateway, not from what the gateway reports.
+- We run the same attacks on six gateways.
+
+That gave two findings you can't get from reading their READMEs:
+
+- The signed log only helps if the agent can't reach the key.
+- A plain hash chain proves the log is consistent, not that nobody altered it.
+
+**Quality.**
+
+- It is reproducible.
+- Its limits are stated honestly: zero successes is given with a confidence bound, not
+  reported as "safe".
+- Every surprising result was checked against the gateway's source code.
+- It follows a responsible disclosure policy.
+
+**How an AI security engineer uses it:** as a test bench and a checklist, not as a product
+to deploy.
+
+1. **Choosing a gateway:** score candidate gateways before adopting one. Today this needs a
+   short adapter; one-command scoring is the next phase.
+2. **Reviewing a deployment:** ask whether the agent can read the key, write the log, edit
+   its own config, or reach the tools directly. Any "yes" tells you what you lose.
+3. **Regression testing:** rerun the scripted attacks after upgrading the gateway or
+   changing its policy.
+4. **Red-teaming with real AI models:** see what they actually try. A clean result is a
+   lower bound, never proof of safety.
+5. **Audits:** when someone hands you an agent's log as evidence, ask whether it is keyed
+   and where the key lives.
+6. **Threat modelling:** reuse our threat-model document, which maps each attack to the
+   OWASP Agentic Top 10, as a template.
 
 ## Part 3 — Plain-language explanations
 
