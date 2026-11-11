@@ -1,0 +1,43 @@
+name: mcp-lab score
+description: >-
+  Attack an MCP gateway the way a misbehaving agent would (role abuse, smuggled
+  arguments, rug pulls, log tampering) and fail the build if an attack goes undetected.
+branding:
+  icon: shield
+  color: gray-dark
+inputs:
+  spec:
+    description: Gateway spec file(s), space-separated (see `mcp-lab template`).
+    required: true
+  fail-on:
+    description: Fail the step if any attack ends this way (undetected | detected | never).
+    default: undetected
+  args:
+    description: Extra arguments for `mcp-lab score`.
+    default: ""
+outputs:
+  results:
+    description: Path of the JSON results file.
+    value: ${{ steps.score.outputs.results }}
+runs:
+  using: composite
+  steps:
+    - uses: astral-sh/setup-uv@v6
+    - id: score
+      shell: bash
+      env:
+        SPECS: ${{ inputs.spec }}
+        FAIL_ON: ${{ inputs.fail-on }}
+        ARGS: ${{ inputs.args }}
+        LAB: ${{ github.action_path }}
+      run: |
+        out="$RUNNER_TEMP/mcp-lab-results.json"
+        echo "results=$out" >> "$GITHUB_OUTPUT"
+        set +e
+        # shellcheck disable=SC2086
+        uvx --python 3.12 --from "$LAB" mcp-lab score $SPECS --fail-on "$FAIL_ON" \
+          --json "$out" --markdown "$RUNNER_TEMP/mcp-lab.md" $ARGS
+        code=$?
+        set -e
+        { echo "## mcp-lab: gateway under agent attack"; echo; cat "$RUNNER_TEMP/mcp-lab.md" 2>/dev/null; } >> "$GITHUB_STEP_SUMMARY"
+        exit $code

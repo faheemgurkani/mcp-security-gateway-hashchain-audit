@@ -16,3 +16,20 @@ jobs:
       - run: uv sync --locked
       - run: uv run ruff check .
       - run: uv run pytest -q
+
+  # Dogfood the reusable action (action.yml): the reference gateway must block or
+  # detect every attack; the toy gateway shows a report with undetected attacks.
+  mcp-lab:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Reference gateway (regression gate)
+        uses: ./
+        with:
+          spec: examples/specs/reference.yaml
+          fail-on: undetected
+      - name: Toy gateway (report only)
+        uses: ./
+        with:
+          spec: examples/specs/toy-gateway.yaml
+          fail-on: never
