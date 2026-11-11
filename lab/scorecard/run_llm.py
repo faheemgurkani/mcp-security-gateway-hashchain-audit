@@ -126,7 +126,15 @@ def main() -> None:
                             flush=True,
                         )
                         return
-                    r = run_one(profile, framing, model, a.max_steps)
+                    try:
+                        r = run_one(profile, framing, model, a.max_steps)
+                    except RuntimeError as e:  # one bad API reply must not end the sweep
+                        print(
+                            f"{profile:9} {model:24} {framing:12} FAILED, rerun with "
+                            f"--resume: {str(e).splitlines()[-1][:120]}",
+                            flush=True,
+                        )
+                        continue
                     r["rep"], r["run_at"] = rep, datetime.now(UTC).isoformat(timespec="seconds")
                     results.append(r)
                     out_path.write_text(json.dumps({"runs": results}, indent=2, default=str))

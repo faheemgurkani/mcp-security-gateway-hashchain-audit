@@ -12,3 +12,4 @@ anchor/
 .ruff_cache/
 lab/.run/
 lab/results/raw/
+lab/.ext/

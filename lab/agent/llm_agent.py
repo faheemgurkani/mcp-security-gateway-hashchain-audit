@@ -136,20 +136,29 @@ async def mcp(fn: str, args: dict[str, Any]) -> str:
 async def _post_with_retry(
     http: httpx2.AsyncClient, headers: dict[str, str], body: dict[str, Any], tries: int = 6
 ) -> dict[str, Any]:
-    """POST to the model API, backing off on 429/5xx (OpenRouter rate limits)."""
+    """POST to the model API, backing off on 429/5xx (OpenRouter rate limits).
+
+    OpenRouter can also answer 200 with an ``error`` body and no ``choices`` when
+    the upstream provider fails; that is retried the same way.
+    """
     delay = 3.0
     for attempt in range(tries):
         resp = await http.post(API, headers=headers, json=body)
-        if resp.status_code in (429, 500, 502, 503) and attempt < tries - 1:
+        retryable = resp.status_code in (429, 500, 502, 503)
+        if not retryable and resp.is_success:
+            data = resp.json()
+            if data.get("choices"):
+                return data
+            retryable = True
+        if retryable and attempt < tries - 1:
             retry_after = resp.headers.get("retry-after")
             wait = float(retry_after) if retry_after and retry_after.isdigit() else delay
             await anyio.sleep(wait)
             delay = min(delay * 2, 30)
             continue
         resp.raise_for_status()
-        return resp.json()
-    resp.raise_for_status()
-    return resp.json()
+        raise RuntimeError(f"model API returned no choices: {str(resp.json())[:300]}")
+    raise RuntimeError("unreachable")
 
 
 async def run(framing: str, model: str, max_steps: int) -> dict[str, Any]:
