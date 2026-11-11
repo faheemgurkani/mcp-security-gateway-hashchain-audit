@@ -159,6 +159,55 @@ uv run python -m lab.scorecard.report                   # -> docs/results/scorec
   [threat model](docs/threat-model/THREAT_MODEL.md)
 - [Design notes & decisions](docs/notes/) · [implementation plan](docs/PLAN.md) ·
   [project review in plain language](docs/notes/05-project-review.md)
+- [Contributing](CONTRIBUTING.md) · [security](SECURITY.md) · [citation](CITATION.cff)
+
+## Contributing
+
+This lab gets more useful with every attack, gateway and deployment shape it covers, and
+collaborators are very welcome. Some ways to help:
+
+- **New attack vectors and techniques:**
+  - tool shadowing;
+  - result-side injection;
+  - session-token replay;
+  - log flooding and rotation;
+  - forged heartbeats;
+  - argument exploits that pass a schema;
+  - signed logs whose signatures are never checked.
+- **Gateway specs:** score the gateway you use or maintain, and add its spec to
+  `examples/specs/`, or run it in your own CI with the GitHub Action.
+- **Hashing schemes** the generic A12 forger doesn't recognise yet.
+- **Deployment profiles and checks:** Kubernetes, systemd sandboxing, remote OAuth
+  gateways.
+- **LLM attackers:** more models, framings, longer budgets and more runs.
+- **Reference gateway upgrades:** an off-host head anchor (C2SP checkpoints or
+  witnesses), and signed checkpoints.
+
+[`CONTRIBUTING.md`](CONTRIBUTING.md) says where each kind of change goes, and the ground
+rules: judge from outside the gateway, don't overclaim, and disclose privately to a
+gateway's maintainer first. Open an issue to propose an attack or a gateway spec.
+Security reports for this repo: [`SECURITY.md`](SECURITY.md).
+
+## Citation
+
+If you use this lab, its results or its attack catalogue, please cite it. GitHub's
+"Cite this repository" button reads [`CITATION.cff`](CITATION.cff); in BibTeX:
+
+```bibtex
+@software{faheem_mcp_lab_2026,
+  author  = {Faheem, Muhammad},
+  title   = {mcp-security-gateway-hashchain-audit: an agent-as-attacker test lab and
+             scoring tool (mcp-lab) for MCP security gateways},
+  year    = {2026},
+  version = {0.2.0},
+  url     = {https://github.com/faheemgurkani/mcp-security-gateway-hashchain-audit},
+  license = {MIT}
+}
+```
+
+For the findings specifically, the
+[technical report](docs/report/technical-report.md) describes the method and the
+results.
 
 ## License
 

@@ -1,0 +1,37 @@
+cff-version: 1.2.0
+message: >-
+  If you use this software, its results or its attack catalogue, please cite it
+  using the metadata below.
+type: software
+title: >-
+  mcp-security-gateway-hashchain-audit: an agent-as-attacker test lab and
+  scoring tool (mcp-lab) for MCP security gateways
+abstract: >-
+  A reproducible benchmark that attacks MCP security gateways with the AI agent
+  itself as the adversary (role and argument abuse, rug pulls, log editing,
+  deletion, truncation and keyless rewrites, bypass), judged from evidence
+  outside the gateway: the tool server's execution ledger and the gateway's
+  own verifier. Includes a reference gateway with an HMAC hash-chained audit
+  log, a three-profile Docker lab, real-LLM attackers, and mcp-lab, which
+  scores any gateway from a short YAML spec.
+authors:
+  - given-names: Muhammad
+    family-names: Faheem
+    alias: faheemgurkani
+repository-code: "https://github.com/faheemgurkani/mcp-security-gateway-hashchain-audit"
+url: "https://github.com/faheemgurkani/mcp-security-gateway-hashchain-audit"
+license: MIT
+version: 0.2.0
+date-released: "2026-11-12"
+keywords:
+  - model context protocol
+  - MCP
+  - AI agent security
+  - agentic AI
+  - security gateway
+  - audit log
+  - hash chain
+  - tamper evidence
+  - red teaming
+  - benchmark
+  - OWASP Agentic Top 10

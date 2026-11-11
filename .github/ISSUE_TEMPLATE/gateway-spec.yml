@@ -1,0 +1,35 @@
+name: Gateway spec
+description: Add (or request) an mcp-lab spec for an MCP gateway.
+labels: ["gateway"]
+body:
+  - type: input
+    id: gateway
+    attributes:
+      label: Gateway, version and link
+    validations:
+      required: true
+  - type: input
+    id: license
+    attributes:
+      label: License
+  - type: textarea
+    id: spec
+    attributes:
+      label: Spec (or what you have so far)
+      description: Output of `mcp-lab template`, filled in. See examples/specs/.
+      render: yaml
+  - type: textarea
+    id: results
+    attributes:
+      label: mcp-lab score output
+      description: >-
+        Paste the table. If the gateway fails a guarantee its own docs make, please
+        tell its maintainer privately before posting details here.
+      render: text
+  - type: checkboxes
+    id: checks
+    attributes:
+      label: Configuration
+      options:
+        - label: Least privilege (a user may call crm.* only) and the strongest audit option on
+        - label: I am the gateway's maintainer

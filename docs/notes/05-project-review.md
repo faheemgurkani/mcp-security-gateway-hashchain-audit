@@ -583,3 +583,12 @@ All of these are logged in `04-implementation-findings.md`.
 The owner decides whether to lift the embargo on the held-back gateway. Maintainer
 outreach stays deferred until the owner chooses otherwise.
 
+Since then (2026-11-12, D-022), the repo has gained:
+- a citation file (`CITATION.cff`, with BibTeX in the README);
+- a contributing guide inviting new attack vectors, gateway specs and more;
+- issue templates;
+- a security policy.
+
+One setting remains for the owner: turning on GitHub's private vulnerability reporting,
+which the security policy relies on.
+

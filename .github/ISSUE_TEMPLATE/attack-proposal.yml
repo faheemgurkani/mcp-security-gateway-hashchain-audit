@@ -1,0 +1,44 @@
+name: Attack proposal
+description: Propose a new attack vector or technique for the catalogue (A13 and up).
+labels: ["attack"]
+body:
+  - type: markdown
+    attributes:
+      value: >-
+        Thanks! Please don't include details of an unfixed weakness in a specific
+        third-party gateway here; report that to its maintainer privately first
+        (see CONTRIBUTING.md).
+  - type: textarea
+    id: attack
+    attributes:
+      label: The attack
+      description: What does the agent do, and what does it gain?
+    validations:
+      required: true
+  - type: input
+    id: owasp
+    attributes:
+      label: OWASP Agentic Top 10 category
+      placeholder: e.g. ASI02 Tool Misuse
+  - type: textarea
+    id: judging
+    attributes:
+      label: Ground-truth judging rule
+      description: >-
+        How do we tell blocked / detected / undetected without trusting the gateway?
+        (tool ledger, the gateway's own verifier, observer evidence)
+    validations:
+      required: true
+  - type: dropdown
+    id: where
+    attributes:
+      label: Where it fits
+      options:
+        - mcp-lab harness (any gateway, no Docker)
+        - Docker lab (needs shell, network or file permissions)
+        - Not sure
+  - type: textarea
+    id: control
+    attributes:
+      label: The control that should stop it
+      description: What a gateway or deployment needs to block or detect it.

@@ -415,6 +415,23 @@ uv run mcp-lab score examples/specs/{mcp-gate-policy,shugo,mcp-glp-audit-proxy,m
 Design decisions with rationale are logged as D-001 to D-021 in `docs/notes/decisions.md`,
 and implementation findings in `docs/notes/04-implementation-findings.md`.
 
+## How to cite
+
+```bibtex
+@techreport{faheem_agent_attacker_2026,
+  author      = {Faheem, Muhammad},
+  title       = {When the Agent Is the Attacker: Measuring {MCP} Security Gateways
+                 Against Their Own Agents},
+  institution = {GitHub repository faheemgurkani/mcp-security-gateway-hashchain-audit},
+  type        = {Technical report},
+  year        = {2026},
+  month       = nov,
+  url         = {https://github.com/faheemgurkani/mcp-security-gateway-hashchain-audit/blob/main/docs/report/technical-report.md}
+}
+```
+
+The software itself: see `CITATION.cff` in the repository root.
+
 ## References
 
 - arXiv:2609.30266: coding agents deleting or editing their own traces when instructed,
