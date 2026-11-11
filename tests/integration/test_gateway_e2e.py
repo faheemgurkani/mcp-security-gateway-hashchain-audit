@@ -56,7 +56,7 @@ def gateway(tmp_path):
             "--upstream-env",
             "DEMO_RUG_PULL_AFTER=4",
             "--arg-rules",
-            str(ROOT / "tools/demo_server/arg-rules.yaml"),
+            str(ROOT / "src/mcp_lab/demo/arg-rules.yaml"),
             "--sessions",
             str(tmp_path / "sessions.yaml"),
             "--key-file",

@@ -1,0 +1,65 @@
+# mcp-lab gateway spec. Score it with:  mcp-lab score this-file.yaml
+#
+# mcp-lab starts your gateway in front of its own demo tool server, which records every
+# call it executes. Configure the gateway as a least-privilege deployment would be:
+#   - the calling identity is an ordinary user who may call crm.lookup and crm.update only;
+#   - admin.delete_user (an admin tool) must not be callable by that user;
+#   - the gateway's strongest audit / integrity option is on.
+# Then mcp-lab attacks it (A7-A10: role and argument abuse, rug pull; A1-A3, A12: log
+# tampering) and judges the result from the tool server's ledger and from YOUR verifier.
+#
+# Placeholders: {{dir}} fresh work dir (also the cwd) · {{upstream}} executable that starts
+# the demo tool server over stdio · {{python}} · {{port}} free TCP port · {{log}} the log
+# path below · {{spec_dir}} this file's directory. Commands run with /bin/sh -c; in them,
+# placeholders are shell-quoted for you, so don't add quotes around them.
+
+name: my-gateway
+version: "1.0.0"
+transport: stdio            # stdio: mcp-lab launches `command` and speaks MCP on its stdin/stdout
+                            # http:  mcp-lab runs `command` in the background and connects to `url`
+
+# How to start the gateway in front of the demo tool server.
+command: my-gateway run --config {{dir}}/config.yaml -- {{upstream}}
+
+# For an HTTP gateway instead:
+# transport: http
+# command: my-gateway serve --port {{port}} --config {{dir}}/config.yaml
+# url: http://127.0.0.1:{{port}}/mcp
+# headers: {Authorization: "Bearer user-token"}
+
+# Files written into the work dir before each start (templates; placeholders allowed).
+files:
+  config.yaml: |
+    upstream: {{upstream}}
+    audit_log: {{dir}}/audit.jsonl
+    roles:
+      user: {allow: ["crm.*"]}
+
+# Optional shell commands run in the work dir before each start (e.g. mint a token).
+# setup:
+#   - my-gateway token --role user > token
+
+# Optional environment for the gateway process (placeholders allowed).
+# env:
+#   MY_GATEWAY_TOKEN: user-token
+
+# Where the audit log ends up, and how YOUR tool verifies it (exit 0 = log accepted).
+# Leave both out if the gateway keeps no verifiable log: A1-A3 and A12 then show as such.
+log: "{{dir}}/audit.jsonl"
+verify: my-gateway verify {{log}}
+
+# Optional. A12 (rewrite the log and recompute its hashes without any key) is tried
+# automatically with every catalogued keyless scheme that reproduces your log. If your
+# chain uses another public scheme, give a command that forges it in place:
+# forge: "{{python}} my_forger.py {{log}}"
+
+# Optional: exit 0 if the gateway raised a rug-pull alarm (turns A10 "undetected" into
+# "detected" when the changed tool still ran).
+# rug_alarm: grep -q tool_changed {{dir}}/alerts.log
+
+# Optional: force the initialize-era MCP handshake (auto-detected by default).
+# legacy: auto
+
+# Shown under the results: what the gateway does not set out to do.
+# caveats:
+#   - "No per-user identity: A7/A8 test the deployment's allow list."

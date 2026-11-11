@@ -13,7 +13,9 @@ from datetime import UTC, datetime
 from pathlib import Path
 
 from lab.adapters.gateways import ALL, EMBARGOED
-from lab.adapters.harness import ROOT, score
+from mcp_lab.harness import score
+
+ROOT = Path(__file__).resolve().parents[2]
 
 PUBLIC = ROOT / "lab/results/external.json"
 PRIVATE = ROOT / "lab/results/raw/external-embargoed.json"

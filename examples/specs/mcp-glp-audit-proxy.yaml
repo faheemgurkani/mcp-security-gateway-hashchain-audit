@@ -1,0 +1,20 @@
+# mcp-glp-audit-proxy (PyPI, Community edition): a proxy for GxP audit trails with
+# roles, an RFC 8785 + SHA-256 chain and a .head sidecar.
+# Install so its commands are on PATH: pip install 'mcp-glp-audit-proxy==0.4.0'
+# It omits the newest spec's required resultType; the handshake is auto-detected.
+name: mcp-glp-audit-proxy
+version: 0.4.0
+files:
+  config.json: |
+    {"principal": {"id": "alice", "name": "Alice", "role": "operator"},
+     "policy": {"allow": ["demo__crm.*"], "deny": [], "write_tools": [],
+                "require_reason_for_writes": false},
+     "audit": {"path": "{{dir}}/audit.jsonl", "fail_closed": true, "body_mode": "full"},
+     "retention": {"profile": "minimum"},
+     "upstreams": [{"name": "demo", "transport": "stdio", "command": "{{upstream}}",
+                    "args": [], "cwd": "{{dir}}"}]}
+command: exec mcp-glp-audit-proxy --config config.json
+log: "{{dir}}/audit.jsonl"
+verify: mcp-glp-audit-proxy-verify {{log}}
+caveats:
+  - "Community edition (signed checkpoints are a Pro feature). Stdio identity comes from GLP_PRINCIPAL_* env set by whoever launches it."

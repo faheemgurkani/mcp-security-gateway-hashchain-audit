@@ -1,0 +1,11 @@
+# A deliberately simple stdio gateway (examples/toy-gateway): an allow list and a
+# keyless SHA-256 hash chain. Score it:  mcp-lab score examples/specs/toy-gateway.yaml
+name: toy-gateway
+version: example
+command: >-
+  {{python}} {{spec_dir}}/../toy-gateway/toy_gateway.py run
+  --allow 'crm.*' --log {{dir}}/audit.jsonl -- {{upstream}}
+log: "{{dir}}/audit.jsonl"
+verify: "{{python}} {{spec_dir}}/../toy-gateway/toy_gateway.py verify {{log}}"
+caveats:
+  - "An example, not a product: no identity, no argument checks, no pinning."

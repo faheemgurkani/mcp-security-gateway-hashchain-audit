@@ -1,5 +1,5 @@
 # Argument rules for the demo tool server, tighter than what the server advertises.
-# Pass to the gateway with `mcp-gateway serve --arg-rules tools/demo_server/arg-rules.yaml`.
+# Pass to the gateway with `mcp-gateway serve --arg-rules src/mcp_lab/demo/arg-rules.yaml`.
 #
 # One JSON Schema per tool. Object schemas are closed by default: a field that is not
 # declared is rejected unless the schema sets `additionalProperties` itself. Tools not

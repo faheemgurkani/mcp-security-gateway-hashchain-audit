@@ -2,8 +2,8 @@
 
 import pytest
 
-from lab.adapters import harness
 from lab.adapters.gateways import REFERENCE
+from mcp_lab import harness
 
 
 def test_reference_blocks_confused_deputy():

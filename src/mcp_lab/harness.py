@@ -24,9 +24,10 @@ from pathlib import Path
 import anyio
 from mcp import Client, MCPError
 
-ROOT = Path(__file__).resolve().parents[2]
-UPSTREAM = [sys.executable, "-m", "tools.demo_server.server"]
-ARG_RULES = ROOT / "tools/demo_server/arg-rules.yaml"
+from mcp_lab import forge as generic
+from mcp_lab.demo import ARG_RULES  # noqa: F401 - re-exported for adapters
+
+UPSTREAM = [sys.executable, "-m", "mcp_lab.demo.server"]
 RUG_AFTER = 3  # demo server changes crm.lookup's description after this many calls
 
 Connect = Callable[[Path, dict[str, str]], AbstractAsyncContextManager[Client]]
@@ -41,6 +42,7 @@ class Gateway:
     log: Callable[[Path], Path]  # where the audit log is
     verify: Callable[[Path], tuple[bool, str]] | None  # the gateway's own integrity check
     forge: Callable[[Path], None] | None = None  # A12: rewrite with the public algorithm
+    generic_forge: bool = False  # A12 without a bespoke forger: try every matching scheme
     dump: Callable[[dict], str] = lambda e: json.dumps(e, sort_keys=True, separators=(",", ":"))
     rug_flagged: Callable[[Path], bool] | None = None  # did it raise a rug-pull alarm?
     prefix: str = ""  # how it renames upstream tools, e.g. "demo__"
@@ -51,7 +53,6 @@ def upstream_env(d: Path, rug: bool = False) -> dict[str, str]:
     return {
         "DEMO_LEDGER": str(d / "ledger.jsonl"),
         "DEMO_RUG_PULL_AFTER": str(RUG_AFTER if rug else 0),
-        "PYTHONPATH": str(ROOT),
     }
 
 
@@ -67,6 +68,8 @@ async def _call(c: Client, tool: str, args: dict) -> str:
         return "error" if r.is_error else "ok"
     except MCPError:
         return "denied"
+    except Exception as e:  # noqa: BLE001 - a malformed reply; the ledger still decides
+        return f"unparseable reply ({type(e).__name__})"
 
 
 async def _drive(gw: Gateway, d: Path, calls: list[tuple[str, dict]], rug: bool) -> list[str]:
@@ -227,6 +230,9 @@ def tamper_cases(gw: Gateway) -> list[dict]:
         if gw.verify is None:
             out.append({**row, "outcome": "undetected", "evidence": "no integrity check"})
             continue
+        if op == "forge" and gw.forge is None and gw.generic_forge:
+            out.append({**row, **_generic_a12(gw, clean, n)})
+            continue
         if op == "forge" and gw.forge is None:
             out.append({**row, "outcome": "n/a", "evidence": "no hash chain to recompute"})
             continue
@@ -247,6 +253,28 @@ def tamper_cases(gw: Gateway) -> list[dict]:
         ev = " | ".join("accepted it" if o == "undetected" else _gist(m) for o, m in results)
         out.append({**row, "outcome": worst, "evidence": f"{n} entries; verifier: {ev}"})
     return out
+
+
+def _generic_a12(gw: Gateway, clean: Path, n: int) -> dict:
+    """A12 with every catalogued scheme that reproduces this gateway's untouched log."""
+    lines, entries = generic.read_entries(gw.log(clean))
+    schemes = generic.matching_schemes(lines, entries)
+    if not schemes:
+        keyed = generic.keyed_fields(entries)
+        why = f"keyed/signed fields {keyed}" if keyed else "no recognised keyless chain"
+        return {"outcome": "n/a", "evidence": f"{n} entries; {why}; no catalogued scheme "
+                "reproduces its hashes (supply `forge:` in the spec to test it)"}  # fmt: skip
+    for s in schemes:
+        d = Path(tempfile.mkdtemp(prefix=f"{gw.name}-A12-"))
+        shutil.copytree(clean, d, dirs_exist_ok=True)
+        generic.forge(gw.log(d), s, d)
+        outcome, msg = _verdict(gw, d)
+        if outcome == "undetected":
+            ev = f"{n} entries; recomputed with {s.name}; verifier accepted it"
+            return {"outcome": "undetected", "evidence": ev}
+    return {"outcome": "detected",
+            "evidence": f"{n} entries; {len(schemes)} matching scheme(s) tried; verifier: "
+            f"{_gist(msg)}"}  # fmt: skip
 
 
 def score(gw: Gateway) -> dict:

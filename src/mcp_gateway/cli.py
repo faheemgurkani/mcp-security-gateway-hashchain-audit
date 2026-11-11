@@ -120,3 +120,7 @@ def verify(
         for i in report.issues:
             typer.echo(f"  line {i.line} seq {i.seq}: {i.kind}: {i.detail}")
     raise typer.Exit(0 if report.ok else 1)
+
+
+if __name__ == "__main__":
+    app()

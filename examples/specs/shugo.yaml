@@ -1,0 +1,19 @@
+# shugo (PyPI), a policy-as-code stdio proxy with a SHA-256 hash-chained audit log.
+# Install so that `shugo` is on PATH: pip install 'shugo==0.1.0'
+name: shugo
+version: 0.1.0
+env:
+  SHUGO_HOME: "{{dir}}/shugo"
+files:
+  guardrails.yaml: |
+    version: "0.1"
+    defaults: {decision: deny, on_error: deny}
+    upstreams:
+      demo: {command: "{{upstream}}", args: []}
+    rules:
+      - {id: crm, match: {server: demo, tool: ["crm.*"]}, decision: allow}
+command: exec shugo serve --config guardrails.yaml
+log: "{{dir}}/shugo/audit.log"
+verify: shugo audit verify
+caveats:
+  - "v0.1 has no per-principal identity (on its v0.2 roadmap): the policy is per deployment, so A7/A8 test the deployment's allow list."

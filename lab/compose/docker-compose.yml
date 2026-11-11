@@ -35,7 +35,7 @@ services:
       - serve
       - --upstream=http://tools:9000/mcp
       - --upstream-token-file=/run/lab/upstream_token
-      - --arg-rules=/app/tools/demo_server/arg-rules.yaml
+      - --arg-rules=/app/src/mcp_lab/demo/arg-rules.yaml
       - --sessions=/run/lab/sessions.yaml
       - --key-file=/run/lab/audit.key
       - --log=/var/lib/gateway/log/audit.jsonl

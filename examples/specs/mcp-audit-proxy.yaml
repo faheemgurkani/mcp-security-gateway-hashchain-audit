@@ -1,0 +1,21 @@
+# mcp-audit-proxy (npm launcher for a Go binary): per-client rules plus rug-pull and
+# tool-poisoning detectors. Install so `mcp-audit` is on PATH:
+#   npm install -g mcp-audit-proxy@0.1.0
+name: mcp-audit-proxy
+version: 0.1.0
+files:
+  mcp-audit.yaml: |
+    mode: stdio
+    policy:
+      rbac: {default: deny, rules: [{client: alice, allow: ["crm.*"]}]}
+      rug_pull_detection: true
+      poisoning_heuristics: true
+      state_path: {{dir}}/state/tools.json
+    sinks:
+      jsonl: {path: {{dir}}/events.jsonl}
+command: exec mcp-audit run --config mcp-audit.yaml --client-id alice --quiet -- {{upstream}}
+log: "{{dir}}/events.jsonl"
+# no verify: a flight recorder that makes no integrity claim
+rug_alarm: grep -q '"policy_flags":\[[^]]*"rug_pull"' {{log}}
+caveats:
+  - "A recorder with detectors, not a tamper-evident log: it does not claim log integrity, so A1-A3/A12 show the absence of that feature, not a defect."

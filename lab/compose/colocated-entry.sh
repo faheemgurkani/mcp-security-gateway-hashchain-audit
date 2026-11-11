@@ -5,7 +5,7 @@ S="$HOME/.gateway-secrets"
 mcp-gateway serve \
   --upstream=http://tools:9000/mcp \
   --upstream-token-file="$S/upstream_token" \
-  --arg-rules=/app/tools/demo_server/arg-rules.yaml \
+  --arg-rules=/app/src/mcp_lab/demo/arg-rules.yaml \
   --sessions="$S/sessions.yaml" \
   --key-file="$S/audit.key" \
   --log="$HOME/.gateway/audit.jsonl" \

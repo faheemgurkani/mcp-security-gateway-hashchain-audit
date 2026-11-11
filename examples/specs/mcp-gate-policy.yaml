@@ -1,0 +1,19 @@
+# mcp-gate-policy (PyPI), a stdio proxy with HMAC-signed role tokens and a SHA-256
+# hash-chained audit log. Install: pip install 'mcp-gate-policy==0.3.2' (into the
+# Python that runs mcp-lab). Score: mcp-lab score examples/specs/mcp-gate-policy.yaml
+name: mcp-gate-policy
+version: 0.3.2
+files:
+  policy.json: |
+    {"default_effect": "deny",
+     "rules": [{"name": "crm", "tools": ["crm.*"], "roles": ["user"], "effect": "allow"}]}
+setup:
+  - >-
+    {{python}} -m mcpgate.cli token --scheme hmac --secret lab-dev-secret-000
+    --agent-id alice --role user | tail -n 1 > token
+command: >-
+  MCPGATE_AGENT_TOKEN="$(cat token)" exec {{python}} -m mcpgate.cli run
+  --policy policy.json --audit audit.log --fail closed --secret lab-dev-secret-000
+  -- {{upstream}}
+log: "{{dir}}/audit.log"
+verify: "{{python}} -m mcpgate.cli verify --audit {{log}}"
