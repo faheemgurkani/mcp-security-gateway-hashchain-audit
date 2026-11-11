@@ -9,6 +9,7 @@ A running record of how this project works and why it is built this way: every c
 | [02-value-proposition.md](02-value-proposition.md) | *(superseded)* First positioning attempt |
 | [03-research-validation.md](03-research-validation.md) | Independent validation: what already exists, the real gap, why my proposal fell short |
 | [04-implementation-findings.md](04-implementation-findings.md) | Running log of findings during implementation and testing |
+| [05-project-review.md](05-project-review.md) | Review against the owner's goals, gap closure with latest results, next steps for outside value |
 | [decisions.md](decisions.md) | Decision log (ADR-style): one entry per decision, with context, options, choice and rationale |
 
 The lab produces scorecards in `docs/results/`: `scorecard.md` (scripted attacker, the upper bound), `scorecard-llm.md` (gpt-oss-120b baseline, a lower bound), `scorecard-llm-models.md` (five latest / safeguard-oriented open-weight models), and `scorecard-external.md` (external gateways vs the reference).
