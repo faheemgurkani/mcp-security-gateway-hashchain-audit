@@ -11,6 +11,28 @@ The owner's goals for the project:
 2. have a portfolio project;
 3. deliver something other people can actually use.
 
+## Contents
+
+- [Part 1 — The review (before gap closure)](#part-1--the-review-before-gap-closure): the original verdict, as given before any fixes
+  - [What it is, in plain terms](#what-it-is-in-plain-terms): MCP, gateways, the agent-as-attacker question, the four parts, the main finding
+  - [How complete it was](#how-complete-it-was): milestones and the four loose ends
+  - [Verdict against the goals (at the time)](#verdict-against-the-goals-at-the-time): learning, portfolio, value to others
+- [Part 2 — What changed since (gap closure, 2026-11-11)](#part-2--what-changed-since-gap-closure-2026-11-11): how each gap was closed, with the latest results
+  - [New attack: A12, keyless rewrite](#new-attack-a12-keyless-rewrite): why a hash chain without a secret proves consistency, not integrity
+  - [Outside gateways: same harness, same attacks](#outside-gateways-same-harness-same-attacks): the six-gateway comparison table and what to take from it
+  - [AI models as attackers (5 runs per test)](#ai-models-as-attackers-5-runs-per-test): gpt-oss-120b, the five newer models, and the first real-LLM success
+  - [Lessons learned along the way (engineering)](#lessons-learned-along-the-way-engineering): harness bugs, provider errors, rechecking claims
+- [In brief: key terms, what is different, how to use it](#in-brief-key-terms-what-is-different-how-to-use-it): one-screen summary of Parts 3 and 4
+- [Part 3 — Plain-language explanations](#part-3--plain-language-explanations): the key terms, explained with analogies
+  - [What "colocated" deployment means](#what-colocated-deployment-means): the three deployment profiles
+  - ["HMAC-signed, hash-chained log"](#hmac-signed-hash-chained-log): hash chain, HMAC key, anchor
+  - ["Pins tool definitions, so it can catch a rug pull"](#pins-tool-definitions-so-it-can-catch-a-rug-pull): rug pulls and tool pinning
+- [Part 4 — How this work differs, and how a security engineer uses it](#part-4--how-this-work-differs-and-how-a-security-engineer-uses-it): positioning, quality, practical use
+  - [How it differs from other projects](#how-it-differs-from-other-projects): what this lab tests that gateway projects don't
+  - [What makes it good quality](#what-makes-it-good-quality): reproducibility, honest limits, disclosure
+  - [How an AI security engineer would use it in production work](#how-an-ai-security-engineer-would-use-it-in-production-work): six concrete uses
+- [Part 5 — What would make it valuable to others (next phase, not started)](#part-5--what-would-make-it-valuable-to-others-next-phase-not-started): the plan for the next stage
+
 ## Part 1 — The review (before gap closure)
 
 **Short version:** a finished, well-made security project. It meets the learning and
