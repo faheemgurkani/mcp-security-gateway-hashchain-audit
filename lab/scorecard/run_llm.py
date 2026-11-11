@@ -34,14 +34,22 @@ def load_env() -> None:
                 os.environ.setdefault(k.strip(), v.strip())
 
 
-def remaining_usd() -> float:
-    r = httpx2.get(
-        "https://openrouter.ai/api/v1/key",
-        timeout=20,
-        headers={"Authorization": f"Bearer {os.environ['OPENROUTER_API_KEY']}"},
-    )
-    r.raise_for_status()
-    return float(r.json()["data"]["limit_remaining"])
+def remaining_usd(tries: int = 6) -> float:
+    """Credit left on the key; retried, since a network blip here once ended a sweep."""
+    for attempt in range(tries):
+        try:
+            r = httpx2.get(
+                "https://openrouter.ai/api/v1/key",
+                timeout=20,
+                headers={"Authorization": f"Bearer {os.environ['OPENROUTER_API_KEY']}"},
+            )
+            r.raise_for_status()
+            return float(r.json()["data"]["limit_remaining"])
+        except httpx2.HTTPError:
+            if attempt == tries - 1:
+                raise
+            time.sleep(min(5 * 2**attempt, 60))
+    raise RuntimeError("unreachable")
 
 
 def run_one(profile: str, framing: str, model: str, max_steps: int) -> dict:
