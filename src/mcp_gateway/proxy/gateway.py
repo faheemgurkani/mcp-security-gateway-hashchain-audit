@@ -1,6 +1,7 @@
 """Reference gateway: Streamable HTTP in (agent zone), stdio out (tool zone).
 
-Every tools/call runs this pipeline, and every outcome is logged:
+Every tools/call runs this pipeline, and every outcome is logged (argument
+rules come from ``--arg-rules`` or each tool's pinned schema, validation/rules.py):
 
     authenticate -> reject identity fields -> pin check -> policy -> validate
       -> log call_request (fail closed) -> forward -> log call_result
@@ -37,7 +38,7 @@ from mcp_gateway.audit.canonical import canonical
 from mcp_gateway.audit.heartbeat import run_heartbeat
 from mcp_gateway.identity import Principal, SessionRegistry, find_impersonation_fields
 from mcp_gateway.policy import Policy, ToolPins, tool_fingerprint
-from mcp_gateway.validation import ArgumentError, validate_arguments
+from mcp_gateway.validation import ArgumentError, ArgumentRules
 
 
 @dataclass
@@ -50,6 +51,8 @@ class GatewayConfig:
     upstream_env: dict[str, str] | None = None
     upstream_token: str | None = None  # gateway's own credential to the tool zone
     allowed_hosts: list[str] | None = None  # Host-header allowlist (DNS-rebinding protection)
+    arg_rules: dict[str, dict] | None = None  # operator JSON Schemas per tool (--arg-rules)
+    upstream_schemas: bool = True  # fall back to each tool's pinned advertised schema
 
 
 def _deny(reason: str) -> CallToolResult:
@@ -77,6 +80,7 @@ class Gateway:
         self.upstream: Client | None = None
         self.pins: ToolPins | None = None
         self._tools: dict[str, Tool] = {}
+        self.rules = ArgumentRules({}, {})
 
     # ---- lifecycle -------------------------------------------------------
     @contextlib.asynccontextmanager
@@ -86,11 +90,17 @@ class Gateway:
             tools = (await upstream.list_tools()).tools
             self._tools = {t.name: t for t in tools}
             self.pins = ToolPins(_fingerprints(tools))
+            upstream_schemas = {t.name: t.input_schema for t in tools}
+            self.rules = ArgumentRules.build(
+                self.cfg.arg_rules, upstream_schemas if self.cfg.upstream_schemas else None
+            )
             self.cfg.chain.append(
                 "proxy_start",
                 {
                     "policy_sha256": self.cfg.policy.sha256,
                     "tools_sha256": self.pins.sha256,
+                    "arg_rules_sha256": self.rules.sha256,
+                    "arg_rule_sources": self.rules.sources,
                     "tools": sorted(self._tools),
                     "upstream": self.cfg.upstream_command,
                 },
@@ -177,7 +187,7 @@ class Gateway:
             return deny("call_denied", decision.reason)
 
         try:
-            clean_args = validate_arguments(tool, args)
+            clean_args = self.rules.validate(tool, args)
         except ArgumentError as e:
             return deny("call_denied", f"invalid arguments: {e}")
 

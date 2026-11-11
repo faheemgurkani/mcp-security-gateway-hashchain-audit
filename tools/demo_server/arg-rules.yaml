@@ -1,0 +1,24 @@
+# Argument rules for the demo tool server, tighter than what the server advertises.
+# Pass to the gateway with `mcp-gateway serve --arg-rules tools/demo_server/arg-rules.yaml`.
+#
+# One JSON Schema per tool. Object schemas are closed by default: a field that is not
+# declared is rejected unless the schema sets `additionalProperties` itself. Tools not
+# listed here fall back to their own advertised (and pinned) input schema.
+tools:
+  crm.lookup:
+    type: object
+    properties:
+      customer_id: {type: string, pattern: "^C\\d{4,8}$"}
+    required: [customer_id]
+  crm.update:
+    type: object
+    properties:
+      customer_id: {type: string, pattern: "^C\\d{4,8}$"}
+      field: {enum: [email, phone, notes]}
+      value: {type: string, maxLength: 500}
+    required: [customer_id, field, value]
+  admin.delete_user:
+    type: object
+    properties:
+      user_id: {type: string, pattern: "^U\\d{4,8}$"}
+    required: [user_id]

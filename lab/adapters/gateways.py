@@ -29,7 +29,7 @@ import yaml
 from mcp import Client, StdioServerParameters
 from mcp.client.streamable_http import streamable_http_client
 
-from lab.adapters.harness import ROOT, UPSTREAM, Gateway
+from lab.adapters.harness import ARG_RULES, ROOT, UPSTREAM, Gateway
 
 EXT = ROOT / "lab/.ext"
 
@@ -84,6 +84,7 @@ async def _reference(d: Path, env: dict[str, str]) -> AsyncIterator[Client]:
     argv = [str(Path(sys.executable).parent / "mcp-gateway"), "serve"]
     argv += ["--upstream", shlex.join(UPSTREAM), "--sessions", str(d / "sessions.yaml")]
     argv += ["--key-file", str(d / "key"), "--log", str(d / "audit.jsonl")]
+    argv += ["--arg-rules", str(ARG_RULES)]
     argv += ["--anchor", str(d / "head.json"), "--port", str(port), "--heartbeat", "3600"]
     for k, v in env.items():
         argv += ["--upstream-env", f"{k}={v}"]

@@ -12,6 +12,7 @@ from mcp_gateway.audit import AuditChain, FileAnchor, verify_log
 from mcp_gateway.identity import SessionRegistry, hash_token
 from mcp_gateway.identity.session import new_token
 from mcp_gateway.policy import Policy
+from mcp_gateway.validation import load_rules_file
 
 app = typer.Typer(no_args_is_help=True, add_completion=False)
 
@@ -64,6 +65,14 @@ def serve(
         None, help="Bearer token the gateway presents to an HTTP tool server."
     ),
     allowed_host: list[str] = typer.Option([], help="Accepted Host headers, e.g. gateway:*"),
+    arg_rules: Path | None = typer.Option(
+        None,
+        help="JSON Schema per tool (YAML/JSON, {tools: {name: schema}}); overrides the "
+        "tool's own schema.",
+    ),
+    upstream_schemas: bool = typer.Option(
+        True, help="Validate tools without an --arg-rules entry against their own pinned schema."
+    ),
 ):
     """Run the reference gateway (Streamable HTTP at /mcp)."""
     import uvicorn
@@ -79,6 +88,8 @@ def serve(
         upstream_env=dict(kv.split("=", 1) for kv in upstream_env) or None,
         upstream_token=upstream_token_file.read_text().strip() if upstream_token_file else None,
         allowed_hosts=allowed_host or None,
+        arg_rules=load_rules_file(arg_rules) if arg_rules else None,
+        upstream_schemas=upstream_schemas,
     )
     uvicorn.run(build_app(cfg), host=host, port=port, log_level="warning")
 

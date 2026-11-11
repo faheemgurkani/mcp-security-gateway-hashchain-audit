@@ -20,6 +20,7 @@ echo "  key, a user token and an admin token issued (only token hashes are store
 echo "== start the gateway on :$PORT (demo tool server as upstream)"
 "${GW[@]}" serve --upstream "$(uv run --quiet python -c 'import shlex,sys; print(shlex.join([sys.executable, "-m", "tools.demo_server.server"]))')" \
   --sessions "$WORK/sessions.yaml" --key-file "$WORK/key" \
+  --arg-rules tools/demo_server/arg-rules.yaml \
   --log "$WORK/audit.jsonl" --anchor "$WORK/head.json" \
   --port "$PORT" --heartbeat 1 &
 GW_PID=$!

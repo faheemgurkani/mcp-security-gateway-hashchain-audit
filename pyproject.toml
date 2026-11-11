@@ -6,6 +6,7 @@ readme = "README.md"
 license = "MIT"
 requires-python = ">=3.12"
 dependencies = [
+    "jsonschema>=4.20",
     "mcp>=2.3,<3",
     "pydantic>=2.7",
     "pyyaml>=6",

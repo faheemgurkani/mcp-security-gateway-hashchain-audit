@@ -356,6 +356,7 @@ name = "mcp-gateway-lab"
 version = "0.1.0"
 source = { editable = "." }
 dependencies = [
+    { name = "jsonschema" },
     { name = "mcp" },
     { name = "pydantic" },
     { name = "pyyaml" },
@@ -378,6 +379,7 @@ dev = [
 
 [package.metadata]
 requires-dist = [
+    { name = "jsonschema", specifier = ">=4.20" },
     { name = "mcp", specifier = ">=2.3,<3" },
     { name = "mcp-gate-policy", marker = "extra == 'external'", specifier = ">=0.3,<0.4" },
     { name = "pydantic", specifier = ">=2.7" },

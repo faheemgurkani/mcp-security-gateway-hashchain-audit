@@ -26,6 +26,7 @@ from mcp import Client, MCPError
 
 ROOT = Path(__file__).resolve().parents[2]
 UPSTREAM = [sys.executable, "-m", "tools.demo_server.server"]
+ARG_RULES = ROOT / "tools/demo_server/arg-rules.yaml"
 RUG_AFTER = 3  # demo server changes crm.lookup's description after this many calls
 
 Connect = Callable[[Path, dict[str, str]], AbstractAsyncContextManager[Client]]
