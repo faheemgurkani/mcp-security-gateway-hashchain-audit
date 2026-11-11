@@ -84,3 +84,8 @@ Format per entry: **ID · date · status**, then Context / Options / Decision / 
 **Context:** LLM-attacker evidence was 1–2 runs per cell.
 **Decision:** raise every cell to 5 runs (6 models x 3 profiles x 3 framings), report a one-sided 95% Clopper-Pearson upper bound per model, and keep hand-written observations in `lab/scorecard/notes/*.md`, re-checked against the transcripts, instead of inside the report generator. Budget: cap $5 for the top-up, floor $5 left on the key.
 **Rationale:** "0/N" means little without N; a bound states what the data supports. Prose inside a generator silently outlives the data it described.
+
+### D-018 · 2026-11-11 · accepted
+**Context:** the 5-model sweep showed agents reading the lab's own source in the agent image (`/app`), including the scripted attack code, and one run opened the git-ignored embargoed adapter, because the image copied all of `lab/`.
+**Decision:** keep the gateway and lab **source** visible to the agent: a real attacker can read open-source code (Kerckhoffs), and hiding it would flatter the gateway. Exclude what an attacker should never see from the image via `.dockerignore`: embargoed adapters (D-016), past results and transcripts (`lab/results`), and external gateway installs (`lab/.ext`). Transcripts that touched embargoed material are redacted before commit, and scorecard notes say which successes read the lab's attack code.
+**Rationale:** the threat model assumes a knowledgeable attacker; disclosure promises and the "answer key" of earlier runs are a different matter.

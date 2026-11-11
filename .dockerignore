@@ -4,3 +4,8 @@ lab/.run
 **/__pycache__
 .pytest_cache
 .ruff_cache
+# never ship into the lab image: embargoed adapters (D-016), past results and
+# transcripts, external gateway installs
+lab/adapters/embargoed.py
+lab/results
+lab/.ext
