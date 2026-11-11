@@ -189,7 +189,8 @@ def as_text(r: DeploymentReport) -> str:
             out.append(f"            opens: {', '.join(c.opens)}")
     out += ["", f"Closest lab profile: {r.profile}"]
     out += [f"  - {x}" for x in r.loses] or ["  - nothing the lab's attacks rely on is exposed"]
-    out += ["", "See docs/results/scorecard.md for every attack under each profile."]
+    out += ["", "Every attack under each profile: https://github.com/faheemgurkani/"
+            "mcp-security-gateway-hashchain-audit/blob/main/docs/results/scorecard.md"]
     return "\n".join(out)
 
 

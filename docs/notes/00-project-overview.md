@@ -35,7 +35,7 @@ observer (outside every zone): records what *really* happened → scorecard
 ```
 
 The four parts:
-1. **Reference gateway** (what we learn Stages 3 and 11 from): strict Pydantic validation, a default-deny role policy, identity fixed by the gateway, an HMAC hash-chained log with sequence numbers and heartbeats, its head anchored where the agent can't write, and fail-closed behaviour if the log can't be written.
+1. **Reference gateway** (what we learn Stages 3 and 11 from): strict per-tool JSON Schema validation (from config or the tool's own pinned schema), a default-deny role policy, identity fixed by the gateway, an HMAC hash-chained log with sequence numbers and heartbeats, its head anchored where the agent can't write, and fail-closed behaviour if the log can't be written.
 2. **Adapters:** one harness that runs the same attacks against any gateway. Five are published so far (the reference gateway, mcp-gate-policy, shugo, mcp-glp-audit-proxy, mcp-audit-proxy), and one more is held back pending private disclosure.
 3. **Attack harness:** scenarios A1–A12 in which the agent edits, deletes or truncates the log, removes the gateway from its config, kills it, calls tools directly, impersonates admin, smuggles parameters, swaps tool definitions, or rewrites the whole log and recomputes its hash chain (A12).
 4. **Observer and scorecard:** for each gateway and attack, was it **blocked**, **detected**, or did it get through **undetected**?

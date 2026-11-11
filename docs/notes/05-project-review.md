@@ -31,7 +31,8 @@ The owner's goals for the project:
   - [How it differs from other projects](#how-it-differs-from-other-projects): what this lab tests that gateway projects don't
   - [What makes it good quality](#what-makes-it-good-quality): reproducibility, honest limits, disclosure
   - [How an AI security engineer would use it in production work](#how-an-ai-security-engineer-would-use-it-in-production-work): six concrete uses
-- [Part 5 — What would make it valuable to others (next phase, not started)](#part-5--what-would-make-it-valuable-to-others-next-phase-not-started): the plan for the next stage
+- [Part 5 — What would make it valuable to others (done 2026-11-11)](#part-5--what-would-make-it-valuable-to-others-done-2026-11-11): the plan for the next stage, and what was built
+  - [What was built (2026-11-11)](#what-was-built-2026-11-11): status of each step, and the tool for each Part 4 use
 
 ## Part 1 — The review (before gap closure)
 
@@ -305,8 +306,8 @@ That gave two findings you can't get from reading their READMEs:
 **How an AI security engineer uses it:** as a test bench and a checklist, not as a product
 to deploy.
 
-1. **Choosing a gateway:** score candidate gateways before adopting one. Today this needs a
-   short adapter; one-command scoring is the next phase.
+1. **Choosing a gateway:** score candidate gateways before adopting one, with
+   `mcp-lab score` and a short YAML spec.
 2. **Reviewing a deployment:** ask whether the agent can read the key, write the log, edit
    its own config, or reach the tools directly. Any "yes" tells you what you lose.
 3. **Regression testing:** rerun the scripted attacks after upgrading the gateway or
@@ -426,8 +427,7 @@ Think of it as a **test bench and a checklist**, not as a product to deploy as-i
    - Before adopting an MCP gateway, score it with the harness.
    - You see in minutes whether it checks arguments, catches rug pulls, and whether its log
      survives a keyless rewrite.
-   - Today that needs a short adapter in `lab/adapters/gateways.py`. A one-command version
-     is the next phase.
+   - One command: `mcp-lab score my-gateway.yaml` (a short YAML spec; see `docs/GUIDE.md`).
 2. **Reviewing a deployment.** The three profiles turn into review questions for any real
    setup:
    - Does the gateway run as a different user or in a different container from the agent?
@@ -454,7 +454,7 @@ Think of it as a **test bench and a checklist**, not as a product to deploy as-i
    Agentic Top 10 and names the trust boundary each control needs. You can reuse it as a
    template for your own agent systems.
 
-## Part 5 — What would make it valuable to others (next phase, not started)
+## Part 5 — What would make it valuable to others (done 2026-11-11)
 
 In order:
 
@@ -473,3 +473,25 @@ In order:
 
 Steps 1–3 turn this from "a strong portfolio piece" into "a tool other people actually
 use".
+
+### What was built (2026-11-11)
+
+| Step | Status | Where |
+|---|---|---|
+| 1. One-command scoring | ✅ **Done, and more general than planned.** `mcp-lab score my-gateway.yaml`: a ~10-line YAML spec instead of a single `--gateway` command, because most gateways also need a config file and a verify command. A12 needs no gateway-specific code (generic forger). Specs for all five external gateways reproduce the published results exactly. It installs straight from GitHub and comes with a GitHub Action for CI. | `src/mcp_lab/`, `examples/specs/`, `action.yml`, D-020 |
+| 2. Argument rules from config | ✅ **Done.** Operator rules file, else the tool's own pinned schema, else deny; closed by default. | `src/mcp_gateway/validation/rules.py`, D-019 |
+| 3. Disclosure and outreach | ⏸ **Deferred by the owner.** Licenses checked: all five are open source (MIT, Apache-2.0, AGPL-3.0), none restricts benchmarking or publishing results, and no code is redistributed. The embargo on one gateway stays until the owner decides. | D-021 |
+| 4. Write-up | ✅ **Technical report** written, covering the five public gateways. | `docs/report/technical-report.md` |
+
+Part 4's six uses now each have a concrete tool or document:
+
+| Use | What to run or read |
+|---|---|
+| 1. Choosing a gateway | `mcp-lab score` |
+| 2. Reviewing a deployment | `mcp-lab check-deployment` |
+| 3. Regression testing | the GitHub Action, or `--fail-on undetected` |
+| 4. Red-teaming with real models | `docs/GUIDE.md` §4 |
+| 5. Audits and incidents | `mcp-lab inspect-log` |
+| 6. Threat modelling | `docs/templates/agent-gateway-review.md` |
+
+The guide (`docs/GUIDE.md`) walks through all six.

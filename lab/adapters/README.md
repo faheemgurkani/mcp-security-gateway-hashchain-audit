@@ -1,7 +1,13 @@
 # Adapters: scoring MCP gateways with one harness
 
-`harness.py` runs the same attacks against every gateway; `gateways.py` describes each
-gateway; `score.py` runs them and writes `lab/results/external.json`, which
+> **Scoring your own gateway?** Use `mcp-lab score my-gateway.yaml` with a YAML spec
+> instead of writing an adapter: see [`docs/GUIDE.md`](../../docs/GUIDE.md) and
+> [`examples/specs/`](../../examples/specs/). Specs for every gateway below reproduce
+> these adapters' results exactly (D-020).
+
+The harness (`src/mcp_lab/harness.py`) runs the same attacks against every gateway;
+`gateways.py` holds bespoke Python adapters for the published comparison; `score.py`
+runs them and writes `lab/results/external.json`, which
 `lab/scorecard/report_external.py` renders into `docs/results/scorecard-external.md`.
 
 ```bash
@@ -80,6 +86,12 @@ leaves it non-executable, hence the `chmod`.
 | [shugo](https://github.com/aritraghosh01/shugo) | 0.1.0 | stdio proxy: policy-as-code, approvals, SHA-256 chain | no per-principal identity in v0.1 |
 | [mcp-glp-audit-proxy](https://github.com/antonio-castellon/mcp-glp-audit-proxy) | 0.4.0 | stdio/HTTPS proxy for GxP audit trails: roles, RFC 8785 + SHA-256 chain, `.head` sidecar | Community edition; needs the legacy handshake |
 | [mcp-audit-proxy](https://github.com/firatmio/mcp-audit-proxy) | 0.1.0 | Go flight recorder: per-client rules, rug-pull and poisoning detectors | no integrity claim |
+
+All five scored gateways are open source: mcp-gate-policy and mcp-audit-proxy are
+Apache-2.0, shugo and mcp-glp-audit-proxy (Community edition) are MIT, and the withheld
+one is AGPL-3.0. None restricts benchmarking or publishing results. Nothing of theirs is
+vendored or redistributed here: each is installed from its public registry and driven
+through its public CLI (D-021).
 
 Checked and **not** scored, because they are not a proxy in front of an arbitrary MCP
 server: `mcp-gatekeeper` on PyPI (a CI quality gate; the npm package of that name is a

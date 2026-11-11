@@ -1,7 +1,7 @@
 [project]
 name = "mcp-gateway-lab"
-version = "0.1.0"
-description = "Agent-as-attacker test lab for MCP security gateways, with a reference gateway (policy, validation, HMAC hash-chained audit log)."
+version = "0.2.0"
+description = "Score any MCP security gateway against an agent that attacks it (mcp-lab), plus a reference gateway (policy, schema validation, HMAC hash-chained audit log)."
 readme = "README.md"
 license = "MIT"
 requires-python = ">=3.12"

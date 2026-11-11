@@ -12,7 +12,7 @@
 - [x] M8: Adapters and scorecard
 - [x] M9: Write-up
 - [x] Gap closure (2026-11-11): no-Docker demo scripts; every LLM cell at 5 runs with confidence bounds; one harness scoring 6 gateways, plus attack A12 (D-015 to D-018). Review and results: `notes/05-project-review.md`.
-- [ ] Next stage: make the lab useful to others (one-command scoring, config-driven argument rules, maintainer outreach). See `notes/05-project-review.md`, Part 5.
+- [x] Value to others (2026-11-11): `mcp-lab` one-command scoring from YAML specs + GitHub Action, `check-deployment`, `inspect-log`; config-driven argument rules; user guide, review template, technical report (D-019 to D-021). Maintainer outreach deferred by the owner. See `notes/05-project-review.md`, Part 5.
 
 ## Context
 The research engineer validated D-003 and found that the original idea is already widely built. At least 15 open-source MCP gateways have policy enforcement, hash-chained logs and verifiers (mcp-gatekeeper, mcp-gate, afr, …). External anchoring is done by witness, agentprov and pipelock (Rekor). A non-bypassable design is done by AgentWall, Tracecat and averin. Attack suites exist too: MCPSEC (outside attacker) and agent-egress-bench (exfiltration).

@@ -60,7 +60,7 @@ assuming them.
 | A6 | Call the tool server directly | ASI02 | network isolation + tool-side token | tool zone unreachable by agent |
 | A7 | Impersonate admin (request fields / forged token) | ASI03 | session-bound identity; fields ignored & logged | token not forgeable by agent |
 | A8 | Confused deputy (user → admin tool) | ASI03 | default-deny role policy | — |
-| A9 | Smuggle / malformed parameters | ASI02 | strict Pydantic schemas (`extra=forbid`) | — |
+| A9 | Smuggle / malformed parameters | ASI02 | strict JSON Schema per tool (operator rules or the pinned tool schema), closed to undeclared fields, no coercion | — |
 | A10 | Rug pull (tool definition changes) | ASI04 | tool-definition pinning | — |
 | A11 | Spoof a log entry | ASI10 | HMAC chain | key is out of agent reach |
 | A12 | Rewrite the log and recompute the chain with the published algorithm | ASI10 | a secret in the chain (HMAC) or a signature that the verifier checks | key is out of agent reach |

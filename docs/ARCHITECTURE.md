@@ -19,7 +19,7 @@ authenticate → reject identity fields → pin check → policy → validate
 | `identity/session.py` | Bearer token → principal + role, from server-side config. Token hashes only. Identity fields in arguments are flagged, never honoured. |
 | `policy/engine.py` + `policy.yaml` | Default-deny, role → allowed tool globs. Policy hash logged at start. |
 | `policy/pinning.py` | Fingerprints tool definitions at start; quarantines changed or newly-appearing tools (rug-pull defence). |
-| `validation/schemas.py` | Strict Pydantic models per tool (`extra="forbid"`, no coercion). Unknown tool → deny. |
+| `validation/rules.py` | A JSON Schema per tool: from `--arg-rules` (operator), else the tool's own `inputSchema` pinned at startup, else deny. Object schemas closed to undeclared fields; no coercion (D-019). |
 | `audit/canonical.py` | RFC 8785 canonical JSON, so hashing is deterministic. |
 | `audit/chain.py` | Append-only JSONL; each entry `{seq, ts_ms, type, session, payload, prev_mac, mac}`, `mac = HMAC-SHA256(key, JCS(entry\mac))`. fsync per write; `AuditWriteError` → fail closed. |
 | `audit/anchor.py` | Atomic external store of the latest `(seq, mac)`; catches truncation. |
@@ -29,6 +29,23 @@ authenticate → reject identity fields → pin check → policy → validate
 | `cli.py` | `keygen`, `issue-token`, `serve`, `verify`. |
 
 Design decisions and rationale: `docs/notes/decisions.md` (D-005…D-018).
+
+## mcp-lab (`src/mcp_lab/`), installable
+
+The part other people use: score any gateway without this repo's Docker lab (D-020).
+
+| Module | Role |
+|--------|------|
+| `harness.py` | The attacks: A7–A10 through the gateway as an MCP client (judged from the tool ledger), and A1–A3 and A12 on copies of its log (judged by its own verifier). |
+| `spec.py` | Builds a gateway from a YAML spec: start command around `{{upstream}}`, config templates, log, verify. Probes the tool prefix and MCP handshake. |
+| `forge.py` | Generic A12: catalogued keyless schemes, used only if they reproduce the untouched log; moves head copies along. |
+| `loginspect.py`, `deployment.py` | `inspect-log` (what a log proves) and `check-deployment` (which profile a real setup is in). |
+| `demo/` | The demo tool server with its execution ledger, and its argument rules. |
+| `reference.py` | The adapter for this repo's gateway (`mcp-lab score --reference`). |
+| `cli.py` | `mcp-lab score / template / inspect-log / check-deployment / demo-server`. |
+
+`action.yml` at the repo root wraps `mcp-lab score` as a GitHub Action. Example specs
+are in `examples/specs/`.
 
 ## Test lab (`lab/`)
 
@@ -46,7 +63,7 @@ agent zone (untrusted) ─HTTP─► gateway zone (trusted) ─internal net─�
 | `attacks/` | `actions.py` (agent-side attacker that discovers its own targets), `scenarios.py` (catalogue + judging rules). |
 | `observer/` | Ground truth from outside the zones: tool ledger, log + anchor copies, Docker events. |
 | `scorecard/` | `run.py` (scripted), `run_llm.py` (LLM, with a budget guard), `report*.py`. |
-| `adapters/` | One harness for every gateway (`harness.py`), gateway definitions (`gateways.py`), runner (`score.py`). Contract in `adapters/README.md`. |
+| `adapters/` | Bespoke adapters for the scored external gateways (`gateways.py`) and the runner that writes the published comparison (`score.py`). The harness itself lives in `mcp_lab`. Contract in `adapters/README.md`. |
 
 ### Deployment profiles (D-010)
 - **reference**: isolated zones — gateway in its own container/UID; log, key, anchor out of agent reach; tools only via the gateway.

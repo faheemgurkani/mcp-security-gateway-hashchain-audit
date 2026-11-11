@@ -16,4 +16,4 @@ The lab produces scorecards in `docs/results/`: `scorecard.md` (scripted attacke
 
 New topics get their own numbered file (`01-<topic>.md`, `02-<topic>.md`, …) and a row in this table.
 
-The working implementation plan lives in [../PLAN.md](../PLAN.md).
+The working implementation plan lives in [../PLAN.md](../PLAN.md). For users of the lab: [../GUIDE.md](../GUIDE.md) (six practical jobs) and [../report/technical-report.md](../report/technical-report.md) (the write-up).
