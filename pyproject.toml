@@ -6,11 +6,6 @@ readme = "README.md"
 license = "MIT"
 authors = [{ name = "Muhammad Faheem" }]
 keywords = ["mcp", "model-context-protocol", "ai-agent-security", "security-gateway", "audit-log", "red-teaming", "benchmark"]
-
-[project.urls]
-Homepage = "https://github.com/faheemgurkani/mcp-security-gateway-hashchain-audit"
-Documentation = "https://github.com/faheemgurkani/mcp-security-gateway-hashchain-audit/blob/main/docs/GUIDE.md"
-Issues = "https://github.com/faheemgurkani/mcp-security-gateway-hashchain-audit/issues"
 requires-python = ">=3.12"
 dependencies = [
     "jsonschema>=4.20",
@@ -21,6 +16,11 @@ dependencies = [
     "typer>=0.12",
     "uvicorn>=0.30",
 ]
+
+[project.urls]
+Homepage = "https://github.com/faheemgurkani/mcp-security-gateway-hashchain-audit"
+Documentation = "https://github.com/faheemgurkani/mcp-security-gateway-hashchain-audit/blob/main/docs/GUIDE.md"
+Issues = "https://github.com/faheemgurkani/mcp-security-gateway-hashchain-audit/issues"
 
 [project.scripts]
 mcp-gateway = "mcp_gateway.cli:app"
