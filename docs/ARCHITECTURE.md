@@ -63,4 +63,5 @@ before/after copies of the log and run the verifier. Each result is
 ## Results
 - `docs/results/scorecard.md` — scripted attacker across three profiles (upper bound on what the gateway must withstand).
 - `docs/results/scorecard-llm.md` — real open-weight LLM agent (lower bound on what a modest agent does).
+- `docs/results/scorecard-llm-models.md` — five newer open-weight models; first real-LLM success (a `colocated` bypass).
 - `docs/results/scorecard-external.md` — five gateways (reference + four external) under the same harness.

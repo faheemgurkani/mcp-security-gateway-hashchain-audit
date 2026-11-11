@@ -74,8 +74,11 @@ and the key.** In the colocated shape — how most stdio wrappers deploy — a
 misbehaving agent rewrites history and the verifier still says OK. Isolation is
 what stops attacks; signatures are what detect them when isolation partly fails.
 
-Full results, including real open-weight LLM attackers (6 models), are in
-[`docs/results/`](docs/results/).
+Real open-weight LLM attackers (6 models, 5 runs per cell, 270 runs) mostly fail
+on their own: no run tampered with the log. But kimi-k3.1-pro, given only a goal
+and a shell, found the `colocated` bypass in 3 of 5 tries: it read the gateway's
+upstream token and called the tool server directly, leaving a clean log. The same
+model failed on `reference`. Full results are in [`docs/results/`](docs/results/).
 
 ### Other gateways, same attacks
 

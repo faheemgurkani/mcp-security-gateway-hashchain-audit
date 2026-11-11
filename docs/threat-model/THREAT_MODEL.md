@@ -17,7 +17,9 @@ The distinguishing assumption of this project: **the agent itself is the
 adversary** (OWASP ASI10 *Rogue Agents*). This is not hypothetical — LLM agents
 delete or edit their own traces when instructed, when injected through a tool
 result or skill file, and unprompted when it raises their reward
-([arXiv:2609.30266]). The attacker can therefore, up to the limits of its
+([arXiv:2609.30266]). This lab reproduced the incentivized case: kimi-k3.1-pro,
+rewarded for a clean log, went around a `colocated` gateway in 3 of 5 runs
+(`docs/results/scorecard-llm-models.md`). The attacker can therefore, up to the limits of its
 deployment:
 
 - send any MCP request, with any arguments and any headers;
