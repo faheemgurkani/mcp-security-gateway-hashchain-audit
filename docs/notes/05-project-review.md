@@ -207,7 +207,143 @@ withstand. A model failing to attack shows a capability gap, not a stronger gate
 - **Recheck hand-written claims whenever the data changes.** Notes now live in separate
   files (`lab/scorecard/notes/`) and are reviewed against the transcripts.
 
-## Part 3 — What would make it valuable to others (next phase, not started)
+## Part 3 — Plain-language explanations
+
+### What "colocated" deployment means
+
+The gateway runs **on the same machine, as the same user, as the agent.**
+
+- This is usually because the agent's app starts the gateway itself, as a subprocess (stdio).
+- Whatever the gateway can read or write, the agent can too: its log, its secret key, its
+  config, and the tool server behind it.
+- Analogy: the security guard keeps the vault key under the burglar's pillow.
+- It is the most common way MCP gateways are deployed today, and in the lab it loses every
+  log attack.
+
+The other two profiles, for contrast:
+
+| Profile | What the agent can reach | Result |
+|---|---|---|
+| `reference` | Nothing: the gateway runs in its own container as its own user | every attack blocked |
+| `breach` | The log file, but not the key | edits are *detected* |
+
+### "HMAC-signed, hash-chained log"
+
+The idea is built up in three layers.
+
+1. **Hash chain.** Every log line carries a fingerprint (a hash) that covers its own content
+   *and* the previous line's fingerprint.
+   - Change, insert or delete one line, and every fingerprint after it stops matching.
+   - Analogy: numbered pages where each page quotes the seal of the page before.
+2. **HMAC (keyed hash).** The fingerprint also mixes in a **secret key**.
+   - With a plain hash, anyone who can edit the file can just recompute all the
+     fingerprints. That is attack A12, and every keyless gateway accepted the result.
+   - With HMAC, recomputing them needs the key, so an attacker without the key cannot forge
+     a valid chain.
+   - That is why the key must live where the agent cannot reach it. In the `colocated`
+     profile it can, and the protection is gone.
+3. **Anchor.** The latest fingerprint is also stored in a second place.
+   - Without it, cutting off the last few lines leaves a shorter chain that is still valid
+     (attack A3).
+   - The anchor shows the log used to be longer.
+
+The result is a log that is **tamper-evident** (you can tell it was changed), not
+tamper-proof (it cannot stop the change).
+
+### "Pins tool definitions, so it can catch a rug pull"
+
+**Rug pull:** a tool looks harmless when you approve it, then quietly changes later.
+
+- Its description might gain hidden instructions for the AI, such as "also send the data
+  to X".
+- Or its inputs might change.
+- The agent trusts the new version because the name is the same.
+
+**Pinning:** at startup the gateway records a fingerprint of each tool's definition (name,
+description, input schema).
+
+- Before every later call it compares the current definition against that fingerprint.
+- If anything changed, it refuses the call.
+- The defence is like a photo of the contract taken on signing day: any later change is
+  obvious.
+
+## Part 4 — How this work differs, and how a security engineer uses it
+
+### How it differs from other projects
+
+Most projects in this space **build a gateway and state what it protects.** This project
+**tests whether those claims hold when the agent itself attacks.** Three things set it
+apart:
+
+1. **The agent is the attacker.** Other tests assume an outside attacker. Here the threat is
+   the very agent the gateway is supposed to control: deleting its own log, killing the
+   gateway, going around it.
+2. **Evidence comes from outside, not from the gateway's word.**
+   - What actually ran comes from the tool server's ledger.
+   - Whether tampering was caught comes from running the gateway's own verifier on a log
+     the harness altered.
+   - A gateway cannot pass by saying it blocked something.
+3. **Same attacks, any gateway.** One harness scores six gateways side by side, so you
+   can compare them fairly.
+
+It produced two findings that are not obvious from reading any gateway's README:
+
+- **Isolation matters more than cryptography.** The signed log only helps if the agent
+  cannot reach the key. Colocated, it loses everything.
+- **A keyless hash chain proves the log is consistent, not that it is unaltered (A12).**
+  Several gateways market exactly that kind of log as tamper-evident.
+
+### What makes it good quality
+
+- **Reproducible:** scripts, Docker profiles and pinned versions; anyone can rerun every
+  number.
+- **Honest limits:**
+  - scripted attacks are the upper bound, LLM attacks the lower bound;
+  - zero successes is reported with a 95% confidence bound, not as "safe";
+  - nothing is called "tamper-proof".
+- **Checked against source:** each surprising result was confirmed by reading the gateway's
+  code, and the one harness bug was found that way.
+- **Responsible:** a disclosure policy (D-013), and one gateway is embargoed until its
+  maintainer is told.
+- **Every decision written down:** `decisions.md`, D-001 onwards.
+
+### How an AI security engineer would use it in production work
+
+Think of it as a **test bench and a checklist**, not as a product to deploy as-is.
+
+1. **Choosing a gateway.**
+   - Before adopting an MCP gateway, score it with the harness.
+   - You see in minutes whether it checks arguments, catches rug pulls, and whether its log
+     survives a keyless rewrite.
+   - Today that needs a short adapter in `lab/adapters/gateways.py`. A one-command version
+     is the next phase.
+2. **Reviewing a deployment.** The three profiles turn into review questions for any real
+   setup:
+   - Does the gateway run as a different user or in a different container from the agent?
+   - Can the agent read the signing key, or the anchor?
+   - Can the agent write the log, or edit its own MCP config to remove the gateway?
+   - Can it reach the tool server directly?
+
+   If any answer is yes, you are in `breach` or `colocated`, and the scorecard tells you
+   what you lose.
+3. **Regression testing.**
+   - After upgrading the gateway or changing its policy, rerun the scripted attacks (as in
+     CI).
+   - This confirms nothing that used to be blocked now gets through.
+4. **Red-teaming with real models.**
+   - `run_llm` points real LLM agents at your setup.
+   - It shows what they actually try (recon, reading config, guessing admin tools).
+   - Treat a clean result as a lower bound, never as proof of safety.
+5. **Audits and incidents.** When someone hands you an agent's log as evidence, ask:
+   - Is it keyed (HMAC or a signature) or a plain hash chain?
+   - Where was the key, and where is the head anchored?
+
+   This project gives you the vocabulary and the test for that conversation.
+6. **Threat modelling.** `docs/threat-model/THREAT_MODEL.md` maps each attack to the OWASP
+   Agentic Top 10 and names the trust boundary each control needs. You can reuse it as a
+   template for your own agent systems.
+
+## Part 5 — What would make it valuable to others (next phase, not started)
 
 In order:
 
