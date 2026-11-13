@@ -1,10 +1,13 @@
 # 05 — Project review: what it is, how complete, does it meet the goals
 
-Written 2026-11-11 for the owner's own learning. Part 1 is the review as given before the
-gap-closing work; Part 2 records what changed afterwards, with the latest results. "In
-brief" is a one-screen summary of Parts 3 and 4: Part 3 explains key terms in plain
-language, and Part 4 covers how the work differs and how to use it in practice. Part 5 is
-the plan for making the project useful to others.
+Written 2026-11-11 for the owner's own learning; updated 2026-11-14. Each topic is covered
+once, and other sections link to it.
+
+- **Part 1:** the review as given before the gap-closing work.
+- **Part 2:** what changed afterwards, with the latest results.
+- **Part 3:** key terms in plain language.
+- **Part 4:** how the work differs, and how to use it in practice.
+- **Part 5:** making it useful to others: what was built, and the embargo.
 
 The owner's goals for the project:
 1. get hands-on with AI security engineering;
@@ -13,30 +16,43 @@ The owner's goals for the project:
 
 ## Contents
 
+- [In brief](#in-brief): one-line answers, each linking to the full section
 - [Part 1 — The review (before gap closure)](#part-1--the-review-before-gap-closure): the original verdict, as given before any fixes
   - [What it is, in plain terms](#what-it-is-in-plain-terms): MCP, gateways, the agent-as-attacker question, the four parts, the main finding
   - [How complete it was](#how-complete-it-was): milestones and the four loose ends
   - [Verdict against the goals (at the time)](#verdict-against-the-goals-at-the-time): learning, portfolio, value to others
 - [Part 2 — What changed since (gap closure, 2026-11-11)](#part-2--what-changed-since-gap-closure-2026-11-11): how each gap was closed, with the latest results
   - [New attack: A12, keyless rewrite](#new-attack-a12-keyless-rewrite): why a hash chain without a secret proves consistency, not integrity
-  - [Outside gateways: same harness, same attacks](#outside-gateways-same-harness-same-attacks): the six-gateway comparison table and what to take from it
+  - [Outside gateways: same harness, same attacks](#outside-gateways-same-harness-same-attacks): the comparison table and what to take from it
   - [AI models as attackers (5 runs per test)](#ai-models-as-attackers-5-runs-per-test): gpt-oss-120b, the five newer models, and the first real-LLM success
   - [Lessons learned along the way (engineering)](#lessons-learned-along-the-way-engineering): harness bugs, provider errors, rechecking claims
-- [In brief: key terms, what is different, how to use it](#in-brief-key-terms-what-is-different-how-to-use-it): one-screen summary of Parts 3 and 4
 - [Part 3 — Plain-language explanations](#part-3--plain-language-explanations): the key terms, explained with analogies
-  - [What "colocated" deployment means](#what-colocated-deployment-means): the three deployment profiles
+  - [What "colocated" deployment means](#what-colocated-deployment-means): the three profiles, and how common colocated really is
   - ["HMAC-signed, hash-chained log"](#hmac-signed-hash-chained-log): hash chain, HMAC key, anchor
   - ["Pins tool definitions, so it can catch a rug pull"](#pins-tool-definitions-so-it-can-catch-a-rug-pull): rug pulls and tool pinning
 - [Part 4 — How this work differs, and how a security engineer uses it](#part-4--how-this-work-differs-and-how-a-security-engineer-uses-it): positioning, quality, practical use
   - [How it differs from other projects](#how-it-differs-from-other-projects): what this lab tests that gateway projects don't
   - [What makes it good quality](#what-makes-it-good-quality): reproducibility, honest limits, disclosure
-  - [How an AI security engineer would use it in production work](#how-an-ai-security-engineer-would-use-it-in-production-work): six concrete uses
-- [Part 5 — What would make it valuable to others (done 2026-11-11)](#part-5--what-would-make-it-valuable-to-others-done-2026-11-11): the plan for the next stage, and what was built
-  - [What was built (2026-11-11)](#what-was-built-2026-11-11): status of each step, and the tool for each Part 4 use
+  - [How an AI security engineer would use it in production work](#how-an-ai-security-engineer-would-use-it-in-production-work): six concrete uses, each with its tool
+- [Part 5 — Making it valuable to others (done 2026-11-11)](#part-5--making-it-valuable-to-others-done-2026-11-11): what was built and how it was tested
+  - [Plan and status](#plan-and-status): each step, what was built, where
   - [How it was tested](#how-it-was-tested): parity with the published results, installs from outside the repo
-  - [Licenses and the embargo](#licenses-and-the-embargo): what the licenses allow, and why the embargo stays
+  - [Licenses and the embargo](#licenses-and-the-embargo): the held-back gateway, its re-score, what the licenses allow
   - [Problems fixed along the way](#problems-fixed-along-the-way): three bugs found while building it
-  - [Next step](#next-step): the owner's decision on the embargo
+  - [Next step](#next-step): the owner's open decisions
+
+## In brief
+
+- **Colocated:** the gateway runs as the agent's own user, so the agent can reach its key,
+  log and tools, and every log attack goes undetected. [More](#what-colocated-deployment-means)
+- **Signed, hash-chained log:** each line's fingerprint covers the previous one and a
+  secret key; an anchor catches lines cut off the end. [More](#hmac-signed-hash-chained-log)
+- **Pinning:** the gateway fingerprints each tool's definition at startup and refuses a
+  tool that later changes (a rug pull). [More](#pins-tool-definitions-so-it-can-catch-a-rug-pull)
+- **How it differs:** other projects build a gateway and state what it protects; this one
+  tests whether those claims hold when the agent attacks. [More](#how-it-differs-from-other-projects)
+- **How to use it:** as a test bench and checklist, not a product to deploy.
+  [More](#how-an-ai-security-engineer-would-use-it-in-production-work)
 
 ## Part 1 — The review (before gap closure)
 
@@ -64,8 +80,8 @@ It has four parts:
    - role rules, with default deny;
    - arguments, with strict schemas.
 
-   It also writes an HMAC-signed, hash-chained log and pins tool definitions, so it can
-   catch a tool that changes after startup (a "rug pull").
+   It also writes an HMAC-signed, hash-chained log and pins tool definitions (both
+   explained in [Part 3](#part-3--plain-language-explanations)).
 2. **A Docker lab** with separate zones for the agent, the gateway and the tools, plus an
    observer outside all three zones.
 3. **Attacks A1–A11.** Each one runs as a script, and some runs use real AI models as
@@ -81,25 +97,15 @@ It has four parts:
 | `breach`: agent can write the log but cannot reach the key | every log attack detected |
 | `colocated`: gateway runs as the agent's own user | the agent rewrites history and the verifier still says "OK" |
 
-`colocated` is the **default** for a stdio gateway launched from the agent's own MCP
-config. An earlier version of this note said it is "how most stdio gateways are deployed
-today"; checked on 2026-11-14, that overstated the evidence (D-023):
-
-- **What holds:** in MCP's stdio transport the client starts the server as a child
-  process, so the gateway runs as the agent's OS user, with its key, log and head where
-  the agent can reach them, unless the operator adds isolation (another user, a
-  container). Five of our six spec'd gateways document exactly this setup.
-- **What doesn't:** no survey or telemetry says how stdio gateways are actually deployed,
-  so "most" was an inference. Docker MCP Gateway puts the tool servers in containers
-  (though the gateway itself may still be reachable). And many 2026 gateway products are
-  remote HTTP services, which are not colocated with the agent at all.
+What colocated means, and how common it really is: [Part 3](#what-colocated-deployment-means).
 
 ### How complete it was
 
 - All milestones (M1–M9) were done.
 - Other gateways could be scored through an adapter, but only one had been
   (mcp-gate-policy).
-- Real AI models had been run as attackers, and none got through (at 1–2 runs per test; see Part 2 for what changed at 5).
+- Real AI models had been run as attackers, and none got through (at 1–2 runs per test;
+  see Part 2 for what changed at 5).
 
 Loose ends:
 
@@ -190,29 +196,8 @@ What to take from it:
 This table is a **capability comparison, not a list of vulnerabilities** (D-013): it
 scores each gateway on controls it may not set out to provide.
 
-**A fifth outside gateway was scored but is held back (D-016).** Its documentation
-promises guarantees that the scoring showed it does not deliver. Under the disclosure
-policy (D-013), its maintainer is told privately before anything is published.
-
-- A draft message is in the git-ignored `lab/results/raw/`.
-- **Owner action:** send that draft privately.
-- Results are published after the maintainer replies or a reasonable time passes.
-
-**Re-scored on 2026-11-14 (D-024).** The scores above were for the version on the package
-index. The project has since published a newer prerelease on its source host only, so
-that version was scored too, with the same spec and with signatures required and checked
-against the trusted public key:
-
-- **fixed in the prerelease:** the verifier now checks every signature, so the
-  newest-entry edit (A1) and the keyless rewrite (A12) are detected;
-- **still open:** truncating the log tail (A3) is accepted, and in its stdio mode every
-  caller still gets the same default identity, so per-agent role rules can't tell agents
-  apart;
-- **not yet on the package index:** a plain install still gives the older version, which
-  has every problem.
-
-The private draft was rewritten to say which problems remain in the latest code and which
-are fixed but unreleased.
+A fifth outside gateway was scored but is held back; see
+[Licenses and the embargo](#licenses-and-the-embargo).
 
 ### AI models as attackers (5 runs per test)
 
@@ -281,74 +266,8 @@ withstand. A model failing to attack shows a capability gap, not a stronger gate
   body and no `choices`. The runner now retries, records the failure, and resumes.
 - **Recheck hand-written claims whenever the data changes.** Notes now live in separate
   files (`lab/scorecard/notes/`) and are reviewed against the transcripts.
-
-## In brief: key terms, what is different, how to use it
-
-The short version of Parts 3 and 4.
-
-**Colocated.** The gateway runs on the same machine, as the same user, as the agent.
-
-- So the agent can reach everything the gateway uses: its log, its secret key, its config,
-  and the tools behind it.
-- It's like a guard who keeps the vault key under the burglar's pillow.
-- Most MCP gateways are set up this way today, and in this setup the gateway loses every
-  log attack.
-- A real model has now shown this too: kimi-k3.1-pro went around a colocated gateway in 3
-  of 5 runs (Part 2).
-
-**Hash-chained, HMAC-signed log.**
-
-- **Hash chain:** each log line carries a fingerprint that covers its own content and the
-  previous line's fingerprint. Change or delete one line, and every fingerprint after it
-  stops matching.
-- **HMAC:** the fingerprint also mixes in a secret key.
-  - With a plain hash, anyone who can edit the file can recompute all the fingerprints.
-    That is our attack A12, and every keyless gateway accepted the forged log.
-  - With HMAC you need the key, so the key must be out of the agent's reach.
-- **Anchor:** the latest fingerprint is also stored somewhere else, so cutting lines off
-  the end is caught.
-
-**Pinning and rug pulls.**
-
-- A rug pull is a tool that looks harmless when approved and later changes; for example,
-  its description gains hidden instructions.
-- At startup the gateway records a fingerprint of each tool's definition. If the
-  definition later changes, the gateway refuses the call.
-
-**How our work differs.** Other projects build a gateway and state what it protects. We
-test whether those claims hold when the agent itself attacks.
-
-- We judge results from evidence outside the gateway, not from what the gateway reports.
-- We run the same attacks on six gateways.
-
-That gave two findings you can't get from reading their READMEs:
-
-- The signed log only helps if the agent can't reach the key.
-- A plain hash chain proves the log is consistent, not that nobody altered it.
-
-**Quality.**
-
-- It is reproducible.
-- Its limits are stated honestly: zero successes is given with a confidence bound, not
-  reported as "safe".
-- Every surprising result was checked against the gateway's source code.
-- It follows a responsible disclosure policy.
-
-**How an AI security engineer uses it:** as a test bench and a checklist, not as a product
-to deploy.
-
-1. **Choosing a gateway:** score candidate gateways before adopting one, with
-   `mcp-lab score` and a short YAML spec.
-2. **Reviewing a deployment:** ask whether the agent can read the key, write the log, edit
-   its own config, or reach the tools directly. Any "yes" tells you what you lose.
-3. **Regression testing:** rerun the scripted attacks after upgrading the gateway or
-   changing its policy.
-4. **Red-teaming with real AI models:** see what they actually try. A clean result is a
-   lower bound, never proof of safety.
-5. **Audits:** when someone hands you an agent's log as evidence, ask whether it is keyed
-   and where the key lives.
-6. **Threat modelling:** reuse our threat-model document, which maps each attack to the
-   OWASP Agentic Top 10, as a template.
+- **Check a project's main branch and tags before disclosing,** not just the package
+  index (see the 2026-11-14 re-score in Part 5).
 
 ## Part 3 — Plain-language explanations
 
@@ -360,8 +279,8 @@ The gateway runs **on the same machine, as the same user, as the agent.**
 - Whatever the gateway can read or write, the agent can too: its log, its secret key, its
   config, and the tool server behind it.
 - Analogy: the security guard keeps the vault key under the burglar's pillow.
-- It is the most common way MCP gateways are deployed today, and in the lab it loses every
-  log attack.
+- In the lab it loses every log attack, and a real model (kimi-k3.1-pro) went around it in
+  3 of 5 runs ([Part 2](#ai-models-as-attackers-5-runs-per-test)).
 
 The other two profiles, for contrast:
 
@@ -369,6 +288,19 @@ The other two profiles, for contrast:
 |---|---|---|
 | `reference` | Nothing: the gateway runs in its own container as its own user | every attack blocked |
 | `breach` | The log file, but not the key | edits are *detected* |
+
+**How common is it?** Colocated is the **default** for a stdio gateway launched from the
+agent's own MCP config. An earlier version of this note said it is "how most stdio
+gateways are deployed today"; checked on 2026-11-14, that overstated the evidence (D-023):
+
+- **What holds:** in MCP's stdio transport the client starts the server as a child
+  process, so the gateway runs as the agent's OS user, with its key, log and head where
+  the agent can reach them, unless the operator adds isolation (another user, a
+  container). Five of our six spec'd gateways document exactly this setup.
+- **What doesn't:** no survey or telemetry says how stdio gateways are actually deployed,
+  so "most" was an inference. Docker MCP Gateway puts the tool servers in containers
+  (though the gateway itself may still be reachable). And many 2026 gateway products are
+  remote HTTP services, which are not colocated with the agent at all.
 
 ### "HMAC-signed, hash-chained log"
 
@@ -431,10 +363,10 @@ apart:
 
 It produced two findings that are not obvious from reading any gateway's README:
 
-- **Isolation matters more than cryptography.** The signed log only helps if the agent
-  cannot reach the key. Colocated, it loses everything.
-- **A keyless hash chain proves the log is consistent, not that it is unaltered (A12).**
-  Several gateways market exactly that kind of log as tamper-evident.
+- **Isolation matters more than cryptography** ([Part 1](#what-it-is-in-plain-terms)).
+- **A keyless hash chain proves consistency, not integrity**
+  ([A12](#new-attack-a12-keyless-rewrite)). Several gateways market exactly that kind of
+  log as tamper-evident.
 
 ### What makes it good quality
 
@@ -452,15 +384,13 @@ It produced two findings that are not obvious from reading any gateway's README:
 
 ### How an AI security engineer would use it in production work
 
-Think of it as a **test bench and a checklist**, not as a product to deploy as-is.
+Think of it as a **test bench and a checklist**, not as a product to deploy as-is. Each use
+has a concrete tool, and `docs/GUIDE.md` walks through all six.
 
-1. **Choosing a gateway.**
-   - Before adopting an MCP gateway, score it with the harness.
+1. **Choosing a gateway:** `mcp-lab score my-gateway.yaml` (a ~10-line YAML spec).
    - You see in minutes whether it checks arguments, catches rug pulls, and whether its log
      survives a keyless rewrite.
-   - One command: `mcp-lab score my-gateway.yaml` (a short YAML spec; see `docs/GUIDE.md`).
-2. **Reviewing a deployment.** The three profiles turn into review questions for any real
-   setup:
+2. **Reviewing a deployment:** `mcp-lab check-deployment`, run as the agent's user. It asks:
    - Does the gateway run as a different user or in a different container from the agent?
    - Can the agent read the signing key, or the anchor?
    - Can the agent write the log, or edit its own MCP config to remove the gateway?
@@ -468,95 +398,34 @@ Think of it as a **test bench and a checklist**, not as a product to deploy as-i
 
    If any answer is yes, you are in `breach` or `colocated`, and the scorecard tells you
    what you lose.
-3. **Regression testing.**
-   - After upgrading the gateway or changing its policy, rerun the scripted attacks (as in
-     CI).
-   - This confirms nothing that used to be blocked now gets through.
-4. **Red-teaming with real models.**
-   - `run_llm` points real LLM agents at your setup.
-   - It shows what they actually try (recon, reading config, guessing admin tools).
-   - Treat a clean result as a lower bound, never as proof of safety.
-5. **Audits and incidents.** When someone hands you an agent's log as evidence, ask:
-   - Is it keyed (HMAC or a signature) or a plain hash chain?
-   - Where was the key, and where is the head anchored?
+3. **Regression testing:** the GitHub Action, or `mcp-lab score --fail-on undetected`.
+   It fails the build if, after an upgrade or policy change, an attack goes undetected.
+   This repo's CI uses it on the reference gateway.
+4. **Red-teaming with real models:** `run_llm` (`docs/GUIDE.md` §4) points real LLM agents
+   at your setup and shows what they actually try (recon, reading config, guessing admin
+   tools). Treat a clean result as a lower bound, never as proof of safety.
+5. **Audits and incidents:** `mcp-lab inspect-log` says whether a log handed to you could
+   have been rewritten without a key. Then ask where the key was and where the head is
+   anchored.
+6. **Threat modelling:** the fillable review in `docs/templates/agent-gateway-review.md`;
+   the worked example `docs/threat-model/THREAT_MODEL.md` maps each attack to the OWASP
+   Agentic Top 10 and names the trust boundary each control needs.
 
-   This project gives you the vocabulary and the test for that conversation.
-6. **Threat modelling.** `docs/threat-model/THREAT_MODEL.md` maps each attack to the OWASP
-   Agentic Top 10 and names the trust boundary each control needs. You can reuse it as a
-   template for your own agent systems.
+## Part 5 — Making it valuable to others (done 2026-11-11)
 
-## Part 5 — What would make it valuable to others (done 2026-11-11)
+### Plan and status
 
-In order:
+| Step | What was planned | Status | Where |
+|---|---|---|---|
+| 1. One-command scoring | a CLI and a generic adapter on top of the shared harness | ✅ **Done, and more general than planned.** A ~10-line YAML spec instead of a single `--gateway` command, because most gateways also need a config file and a verify command. A12 needs no gateway-specific code: a generic forger works out the hashing scheme from the gateway's own log. Installs straight from GitHub; comes with a GitHub Action. | `src/mcp_lab/`, `examples/specs/`, `action.yml`, D-020 |
+| 2. Argument rules from config | work with any tools, not just the demo server | ✅ **Done.** Operator rules file, else the tool's own pinned schema, else deny; extra fields rejected by default. | `src/mcp_gateway/validation/rules.py`, D-019 |
+| 3. Disclosure and outreach | private note to the held-back gateway's maintainer; offer each maintainer their results | ⏸ **Deferred by the owner.** See [Licenses and the embargo](#licenses-and-the-embargo). | D-021 |
+| 4. Write-up | built around the two findings | ✅ **Technical report** written, covering the five public gateways. | `docs/report/technical-report.md` |
 
-1. **One-command scoring**, e.g. `mcp-lab score --gateway "<command>"`, so a gateway
-   author can test their own gateway in minutes. The shared harness (`lab/adapters/`) is
-   the foundation; what remains is a CLI and a generic adapter.
-2. **Load argument rules from config**, or from each tool's own schema combined with
-   pinning, so the reference gateway works with any tools, not just the demo server.
-3. **Disclosure and outreach.**
-   - Send the held-back gateway's maintainer the private note.
-   - Offer each scored maintainer their results under D-013.
-   - This is where outside credibility comes from.
-4. **A short write-up** (blog post or LinkedIn) built around the two findings:
-   - the key must be out of the agent's reach;
-   - a keyless hash chain proves consistency, not integrity.
-
-Steps 1–3 turn this from "a strong portfolio piece" into "a tool other people actually
-use".
-
-### What was built (2026-11-11)
-
-| Step | Status | Where |
-|---|---|---|
-| 1. One-command scoring | ✅ **Done, and more general than planned.** `mcp-lab score my-gateway.yaml`: a ~10-line YAML spec instead of a single `--gateway` command, because most gateways also need a config file and a verify command. A12 needs no gateway-specific code (generic forger). Specs for all five external gateways reproduce the published results exactly. It installs straight from GitHub and comes with a GitHub Action for CI. | `src/mcp_lab/`, `examples/specs/`, `action.yml`, D-020 |
-| 2. Argument rules from config | ✅ **Done.** Operator rules file, else the tool's own pinned schema, else deny; closed by default. | `src/mcp_gateway/validation/rules.py`, D-019 |
-| 3. Disclosure and outreach | ⏸ **Deferred by the owner.** Licenses checked: all five are open source (MIT, Apache-2.0, AGPL-3.0), none restricts benchmarking or publishing results, and no code is redistributed. The embargo on one gateway stays until the owner decides. | D-021 |
-| 4. Write-up | ✅ **Technical report** written, covering the five public gateways. | `docs/report/technical-report.md` |
-
-Part 4's six uses now each have a concrete tool or document:
-
-| Use | What to run or read |
-|---|---|
-| 1. Choosing a gateway | `mcp-lab score` |
-| 2. Reviewing a deployment | `mcp-lab check-deployment` |
-| 3. Regression testing | the GitHub Action, or `--fail-on undetected` |
-| 4. Red-teaming with real models | `docs/GUIDE.md` §4 |
-| 5. Audits and incidents | `mcp-lab inspect-log` |
-| 6. Threat modelling | `docs/templates/agent-gateway-review.md` |
-
-The guide (`docs/GUIDE.md`) walks through all six.
-
-**In short:** the project is now usable by other people.
-
-- Anyone can install it straight from GitHub and score their own MCP gateway with one
-  command, or add it to their CI with the GitHub Action.
-- The work landed in 4 commits (`c3b1d05`, `30698fc`, `7bbf7ce`, `77c9679`).
-- All 72 tests pass, and GitHub CI is green on both jobs (tests, and the action gating the
-  reference gateway).
-
-In plain terms, each step works like this:
-
-- **Step 1, one-command scoring.**
-  - A gateway author writes a ~10-line YAML file describing how to start their gateway.
-  - Then `mcp-lab score my-gateway.yaml` runs every attack and prints one table.
-  - The "rewrite the log" attack (A12) needs no custom code: the tool works out the
-    gateway's hashing scheme from its own log.
-- **Step 2, argument rules from config.** Each tool is checked against rules from a
-  config file, or failing that the tool's own pinned schema, so the reference gateway
-  works with any tools. Extra fields are rejected by default.
-- **Part 4's six uses**, each with a concrete tool:
-  1. **Choosing a gateway:** `mcp-lab score`.
-  2. **Reviewing a deployment:** `mcp-lab check-deployment`. Run as the agent's user, it
-     says which risk profile the setup is in and what that loses.
-  3. **CI regression testing:** a GitHub Action anyone can add to their own CI; it fails
-     the build if an attack goes undetected. This repo's CI uses it on the reference
-     gateway.
-  4. **Red-teaming with AI models:** section 4 of the guide.
-  5. **Audits:** `mcp-lab inspect-log` says whether a log handed to you could have been
-     rewritten without a key.
-  6. **Threat modelling:** a fillable review template in
-     `docs/templates/agent-gateway-review.md`.
+The work landed in 4 commits (`c3b1d05`, `30698fc`, `7bbf7ce`, `77c9679`). All 72 tests
+pass, and GitHub CI is green on both jobs (tests, and the action gating the reference
+gateway). How each Part 4 use maps to a tool is in
+[Part 4](#how-an-ai-security-engineer-would-use-it-in-production-work).
 
 ### How it was tested
 
@@ -576,7 +445,28 @@ In plain terms, each step works like this:
 
 ### Licenses and the embargo
 
-All five scored gateways are open source:
+**The held-back gateway (D-016).** A fifth outside gateway was scored but its results are
+withheld. Its documentation promises guarantees that the scoring showed it does not
+deliver, so under the disclosure policy (D-013) its maintainer is told privately before
+anything is published. A draft message is in the git-ignored `lab/results/raw/`.
+
+**Re-scored on 2026-11-14 (D-024).** The first scores were for the version on the package
+index. The project has since published a newer prerelease on its source host only, so
+that version was scored too, with the same spec and with signatures required and checked
+against the trusted public key:
+
+- **fixed in the prerelease:** the verifier now checks every signature, so the
+  newest-entry edit (A1) and the keyless rewrite (A12) are detected;
+- **still open:** truncating the log tail (A3) is accepted, and in its stdio mode every
+  caller still gets the same default identity, so per-agent role rules can't tell agents
+  apart;
+- **not yet on the package index:** a plain install still gives the older version, which
+  has every problem.
+
+The private draft now says which problems remain in the latest code and which are fixed
+but unreleased.
+
+**Licenses (D-021).** All five scored outside gateways are open source:
 
 | License | Gateways |
 |---|---|
@@ -588,10 +478,10 @@ None restricts benchmarking or publishing results. The project does not copy or
 redistribute any of their code: each is installed separately and run through its own
 commands. So the licenses allow publishing the results in a report or paper.
 
-The embargo stays anyway. It rests on this project's own disclosure policy (D-013), not
+The embargo stays anyway, because it rests on this project's own disclosure policy, not
 on licensing. The technical report covers the five public gateways and only says that a
-sixth was withheld. Lifting the embargo is the owner's call; once lifted, that gateway is
-added to the public table and the report. Recorded as D-021.
+sixth was withheld. Once the embargo is lifted, that gateway is added to the public table
+and the report.
 
 ### Problems fixed along the way
 
@@ -607,16 +497,12 @@ All of these are logged in `04-implementation-findings.md`.
 
 ### Next step
 
-The owner decides whether to lift the embargo on the held-back gateway; the draft now
-reflects the 2026-11-14 re-score of its latest prerelease (D-024). Maintainer
-outreach stays deferred until the owner chooses otherwise.
+Since 2026-11-12 (D-022) the repo also has a citation file (`CITATION.cff`, with BibTeX in
+the README), a contributing guide inviting new attack vectors and gateway specs, issue
+templates and a security policy.
 
-Since then (2026-11-12, D-022), the repo has gained:
-- a citation file (`CITATION.cff`, with BibTeX in the README);
-- a contributing guide inviting new attack vectors, gateway specs and more;
-- issue templates;
-- a security policy.
+Open decisions for the owner:
 
-One setting remains for the owner: turning on GitHub's private vulnerability reporting,
-which the security policy relies on.
-
+- whether to send the private draft and when to lift the embargo (maintainer outreach is
+  deferred until then);
+- turning on GitHub's private vulnerability reporting, which the security policy relies on.
