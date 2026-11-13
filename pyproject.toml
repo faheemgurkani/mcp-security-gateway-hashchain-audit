@@ -1,12 +1,25 @@
 [project]
 name = "mcp-gateway-lab"
-version = "0.2.0"
+dynamic = ["version"]
 description = "Score any MCP security gateway against an agent that attacks it (mcp-lab), plus a reference gateway (policy, schema validation, HMAC hash-chained audit log)."
 readme = "README.md"
 license = "MIT"
-authors = [{ name = "Muhammad Faheem" }]
+authors = [{ name = "Muhammad Faheem", email = "faheemgurkani@gmail.com" }]
 keywords = ["mcp", "model-context-protocol", "ai-agent-security", "security-gateway", "audit-log", "red-teaming", "benchmark"]
 requires-python = ">=3.12"
+classifiers = [
+    "Development Status :: 3 - Alpha",
+    "Environment :: Console",
+    "Intended Audience :: Developers",
+    "Intended Audience :: Information Technology",
+    "Intended Audience :: Science/Research",
+    "Operating System :: OS Independent",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.12",
+    "Programming Language :: Python :: 3.13",
+    "Topic :: Security",
+    "Topic :: Software Development :: Testing",
+]
 dependencies = [
     "jsonschema>=4.20",
     "mcp>=2.3,<3",
@@ -21,6 +34,7 @@ dependencies = [
 Homepage = "https://github.com/faheemgurkani/mcp-security-gateway-hashchain-audit"
 Documentation = "https://github.com/faheemgurkani/mcp-security-gateway-hashchain-audit/blob/main/docs/GUIDE.md"
 Issues = "https://github.com/faheemgurkani/mcp-security-gateway-hashchain-audit/issues"
+Changelog = "https://github.com/faheemgurkani/mcp-security-gateway-hashchain-audit/blob/main/CHANGELOG.md"
 
 [project.scripts]
 mcp-lab-gateway = "mcp_lab.gateway.cli:app"
@@ -37,6 +51,23 @@ dev = ["pytest>=8", "pytest-asyncio>=0.24", "ruff>=0.6"]
 [build-system]
 requires = ["hatchling"]
 build-backend = "hatchling.build"
+
+[tool.hatch.version]
+path = "src/mcp_lab/__init__.py"
+
+# The sdist is an explicit allow-list: hatch honours .gitignore but not
+# .git/info/exclude, so a default sdist would ship local-only files.
+[tool.hatch.build.targets.sdist]
+include = [
+    "/src",
+    "/tests",
+    "/examples",
+    "/README.md",
+    "/LICENSE",
+    "/CHANGELOG.md",
+    "/CITATION.cff",
+]
+exclude = ["__pycache__", "*.pyc"]
 
 [tool.hatch.build.targets.wheel]
 packages = ["src/mcp_lab"]

@@ -21,7 +21,7 @@ authors:
 repository-code: "https://github.com/faheemgurkani/mcp-security-gateway-hashchain-audit"
 url: "https://github.com/faheemgurkani/mcp-security-gateway-hashchain-audit"
 license: MIT
-version: 0.2.0
+version: 0.3.0
 date-released: "2026-11-12"
 keywords:
   - model context protocol

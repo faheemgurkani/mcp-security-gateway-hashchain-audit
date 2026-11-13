@@ -47,14 +47,14 @@ toy-gateway example (stdio)
 ```
 
 - **Specs to copy:** working specs for six gateways are in
-  [`examples/specs/`](examples/specs/).
+  [`examples/specs/`](https://github.com/faheemgurkani/mcp-security-gateway-hashchain-audit/tree/main/examples/specs/).
 - **CI:** to gate your own CI, use this repo as a GitHub Action
   (`uses: faheemgurkani/mcp-security-gateway-hashchain-audit@main` with `spec:`).
 - **Other jobs:**
   - `mcp-lab check-deployment` tells you which risk profile a real deployment is in;
   - `mcp-lab inspect-log` tells you what an audit log handed to you can actually prove.
 
-All of it is in **[the guide](docs/GUIDE.md)**.
+All of it is in **[the guide](https://github.com/faheemgurkani/mcp-security-gateway-hashchain-audit/blob/main/docs/GUIDE.md)**.
 
 ## What we found
 
@@ -102,12 +102,12 @@ Each attack is the same for every gateway, and is judged by the gateway's own ve
 
 Anyone who can write a plain SHA-256 chain can recompute it, and every keyless verifier
 accepted the rewritten log (A12). This is a **capability comparison, not a list of
-vulnerabilities**: see [`scorecard-external.md`](docs/results/scorecard-external.md) for
+vulnerabilities**: see [`scorecard-external.md`](https://github.com/faheemgurkani/mcp-security-gateway-hashchain-audit/blob/main/docs/results/scorecard-external.md) for
 per-gateway caveats. One more gateway was scored; its results are withheld under this
 project's disclosure policy.
 
-The full write-up is in the [technical report](docs/report/technical-report.md); every
-number comes from [`docs/results/`](docs/results/).
+The full write-up is in the [technical report](https://github.com/faheemgurkani/mcp-security-gateway-hashchain-audit/blob/main/docs/report/technical-report.md); every
+number comes from [`docs/results/`](https://github.com/faheemgurkani/mcp-security-gateway-hashchain-audit/tree/main/docs/results/).
 
 ## The reference gateway
 
@@ -155,14 +155,14 @@ uv run python -m lab.scorecard.report                   # -> docs/results/scorec
 
 ## Documentation
 
-- [Guide: using the lab in practice](docs/GUIDE.md) ·
-  [review template](docs/templates/agent-gateway-review.md)
-- [Technical report](docs/report/technical-report.md)
-- [Architecture](docs/ARCHITECTURE.md) ·
-  [threat model](docs/threat-model/THREAT_MODEL.md)
-- [Design notes & decisions](docs/notes/) · [implementation plan](docs/PLAN.md) ·
-  [project review in plain language](docs/notes/05-project-review.md)
-- [Contributing](CONTRIBUTING.md) · [security](SECURITY.md) · [citation](CITATION.cff)
+- [Guide: using the lab in practice](https://github.com/faheemgurkani/mcp-security-gateway-hashchain-audit/blob/main/docs/GUIDE.md) ·
+  [review template](https://github.com/faheemgurkani/mcp-security-gateway-hashchain-audit/blob/main/docs/templates/agent-gateway-review.md)
+- [Technical report](https://github.com/faheemgurkani/mcp-security-gateway-hashchain-audit/blob/main/docs/report/technical-report.md)
+- [Architecture](https://github.com/faheemgurkani/mcp-security-gateway-hashchain-audit/blob/main/docs/ARCHITECTURE.md) ·
+  [threat model](https://github.com/faheemgurkani/mcp-security-gateway-hashchain-audit/blob/main/docs/threat-model/THREAT_MODEL.md)
+- [Design notes & decisions](https://github.com/faheemgurkani/mcp-security-gateway-hashchain-audit/tree/main/docs/notes/) · [implementation plan](https://github.com/faheemgurkani/mcp-security-gateway-hashchain-audit/blob/main/docs/PLAN.md) ·
+  [project review in plain language](https://github.com/faheemgurkani/mcp-security-gateway-hashchain-audit/blob/main/docs/notes/05-project-review.md)
+- [Contributing](https://github.com/faheemgurkani/mcp-security-gateway-hashchain-audit/blob/main/CONTRIBUTING.md) · [security](https://github.com/faheemgurkani/mcp-security-gateway-hashchain-audit/blob/main/SECURITY.md) · [citation](https://github.com/faheemgurkani/mcp-security-gateway-hashchain-audit/blob/main/CITATION.cff)
 
 ## Contributing
 
@@ -186,15 +186,15 @@ collaborators are very welcome. Some ways to help:
 - **Reference gateway upgrades:** an off-host head anchor (C2SP checkpoints or
   witnesses), and signed checkpoints.
 
-[`CONTRIBUTING.md`](CONTRIBUTING.md) says where each kind of change goes, and the ground
+[`CONTRIBUTING.md`](https://github.com/faheemgurkani/mcp-security-gateway-hashchain-audit/blob/main/CONTRIBUTING.md) says where each kind of change goes, and the ground
 rules: judge from outside the gateway, don't overclaim, and disclose privately to a
 gateway's maintainer first. Open an issue to propose an attack or a gateway spec.
-Security reports for this repo: [`SECURITY.md`](SECURITY.md).
+Security reports for this repo: [`SECURITY.md`](https://github.com/faheemgurkani/mcp-security-gateway-hashchain-audit/blob/main/SECURITY.md).
 
 ## Citation
 
 If you use this lab, its results or its attack catalogue, please cite it. GitHub's
-"Cite this repository" button reads [`CITATION.cff`](CITATION.cff); in BibTeX:
+"Cite this repository" button reads [`CITATION.cff`](https://github.com/faheemgurkani/mcp-security-gateway-hashchain-audit/blob/main/CITATION.cff); in BibTeX:
 
 ```bibtex
 @software{faheem_mcp_lab_2026,
@@ -202,14 +202,14 @@ If you use this lab, its results or its attack catalogue, please cite it. GitHub
   title   = {mcp-security-gateway-hashchain-audit: an agent-as-attacker test lab and
              scoring tool (mcp-lab) for MCP security gateways},
   year    = {2026},
-  version = {0.2.0},
+  version = {0.3.0},
   url     = {https://github.com/faheemgurkani/mcp-security-gateway-hashchain-audit},
   license = {MIT}
 }
 ```
 
 For the findings specifically, the
-[technical report](docs/report/technical-report.md) describes the method and the
+[technical report](https://github.com/faheemgurkani/mcp-security-gateway-hashchain-audit/blob/main/docs/report/technical-report.md) describes the method and the
 results.
 
 ## License
