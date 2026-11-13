@@ -68,7 +68,7 @@ agent zone (untrusted) ─HTTP─► gateway zone (trusted) ─internal net─�
 ### Deployment profiles (D-010)
 - **reference**: isolated zones — gateway in its own container/UID; log, key, anchor out of agent reach; tools only via the gateway.
 - **breach**: agent can write the log volume, but has no key and no anchor.
-- **colocated**: gateway runs as the agent's own user, with log, key, anchor and tool credential on the agent's disk (how most stdio wrappers deploy).
+- **colocated**: gateway runs as the agent's own user, with log, key, anchor and tool credential on the agent's disk (the default for a stdio wrapper launched from the agent's own MCP config; how common it is in practice is unmeasured, D-023).
 
 ### How outcomes are decided
 Never from the gateway's own claims. **Execution**: compare the tool zone's

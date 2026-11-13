@@ -69,9 +69,12 @@ a Docker lab, with agent, gateway and tool zones:
 | **breach** (log writable, no key) | 🔎 detected | 🛡️ blocked | 🛡️ blocked |
 | **colocated** (gateway as agent's user) | ❌ undetected | ❌ undetected | 🛡️ blocked |
 
-In the colocated shape, which is how most stdio gateways are deployed, a misbehaving
-agent rewrites history and the verifier still says OK. Isolation is what stops attacks;
+In the colocated shape, a misbehaving agent rewrites history and the verifier still says OK. Isolation is what stops attacks;
 signatures are what detect them when isolation partly fails.
+
+Colocated is the default for a stdio gateway launched from the agent's own MCP config:
+it runs as the agent's OS user unless the operator isolates it. How many real
+deployments look like this has not been measured.
 
 ### 2. A real model found the bypass on its own
 

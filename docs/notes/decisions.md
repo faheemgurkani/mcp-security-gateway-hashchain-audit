@@ -111,3 +111,8 @@ Format per entry: **ID · date · status**, then Context / Options / Decision / 
 **Rationale:** citations and concrete entry points are what turn a portfolio repo into one others build on. Putting the disclosure rule into the contribution path keeps contributed results consistent with D-013.
 **Open:** GitHub private vulnerability reporting is off for the repo; `SECURITY.md` relies on it. Turning it on is a repository setting, left to the owner.
 
+
+### D-023 · 2026-11-14 · accepted
+**Context:** the owner asked to verify the claim "colocated is how most stdio gateways are deployed today" (README, ARCHITECTURE, notes/04, notes/05).
+**Decision:** reword it everywhere to what the protocol backs up: colocated is the **default** for a stdio gateway launched from the agent's own MCP config, since the client spawns it as the agent's OS user unless the operator isolates it. State that prevalence is unmeasured.
+**Rationale:** no survey or telemetry on real stdio-gateway deployments was found, so "most" was an inference from the transport and from our six specs. Partial exceptions exist (Docker MCP Gateway containerises tool servers), and a growing share of 2026 gateway products are remote HTTP services, which are not colocated. Sources checked: 2026 gateway roundups (Geekflare, Maxim, Morph, MetaMCP guide, MintMCP).

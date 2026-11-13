@@ -81,7 +81,18 @@ It has four parts:
 | `breach`: agent can write the log but cannot reach the key | every log attack detected |
 | `colocated`: gateway runs as the agent's own user | the agent rewrites history and the verifier still says "OK" |
 
-`colocated` is how most stdio gateways are deployed today.
+`colocated` is the **default** for a stdio gateway launched from the agent's own MCP
+config. An earlier version of this note said it is "how most stdio gateways are deployed
+today"; checked on 2026-11-14, that overstated the evidence (D-023):
+
+- **What holds:** in MCP's stdio transport the client starts the server as a child
+  process, so the gateway runs as the agent's OS user, with its key, log and head where
+  the agent can reach them, unless the operator adds isolation (another user, a
+  container). Five of our six spec'd gateways document exactly this setup.
+- **What doesn't:** no survey or telemetry says how stdio gateways are actually deployed,
+  so "most" was an inference. Docker MCP Gateway puts the tool servers in containers
+  (though the gateway itself may still be reachable). And many 2026 gateway products are
+  remote HTTP services, which are not colocated with the agent at all.
 
 ### How complete it was
 
