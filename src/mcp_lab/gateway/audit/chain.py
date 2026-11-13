@@ -21,8 +21,8 @@ import time
 from pathlib import Path
 from typing import Any
 
-from mcp_gateway.audit.anchor import FileAnchor, Head
-from mcp_gateway.audit.canonical import canonical
+from mcp_lab.gateway.audit.anchor import FileAnchor, Head
+from mcp_lab.gateway.audit.canonical import canonical
 
 GENESIS_MAC = "0" * 64
 FORMAT_VERSION = 1

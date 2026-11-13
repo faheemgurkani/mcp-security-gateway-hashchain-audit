@@ -17,8 +17,8 @@ import json
 import os
 from dataclasses import dataclass, field
 
-from mcp_gateway.audit.anchor import Head
-from mcp_gateway.audit.chain import GENESIS_MAC, compute_mac
+from mcp_lab.gateway.audit.anchor import Head
+from mcp_lab.gateway.audit.chain import GENESIS_MAC, compute_mac
 
 
 @dataclass(frozen=True)

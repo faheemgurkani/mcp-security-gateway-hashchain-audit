@@ -1,4 +1,4 @@
-from mcp_gateway.identity import (
+from mcp_lab.gateway.identity import (
     Principal,
     SessionRegistry,
     find_impersonation_fields,

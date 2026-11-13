@@ -5,7 +5,7 @@ name: reference-gateway
 version: this repo
 transport: http
 setup:
-  - "{{python}} -m mcp_gateway.cli keygen --out key > /dev/null"
+  - "{{python}} -m mcp_lab.gateway.cli keygen --out key > /dev/null"
 files:
   sessions.yaml: |
     sessions:
@@ -14,11 +14,11 @@ files:
         # sha256 of the token "user-token-spec"
         token_sha256: f4419f98c0a72dece9c237317acef23c0eb01f86407853343ce9459770f73d38
 command: >-
-  {{python}} -m mcp_gateway.cli serve --upstream {{upstream}}
+  {{python}} -m mcp_lab.gateway.cli serve --upstream {{upstream}}
   --sessions sessions.yaml --key-file key --log audit.jsonl --anchor head.json
   --port {{port}} --heartbeat 3600
 url: http://127.0.0.1:{{port}}/mcp
 headers:
   Authorization: Bearer user-token-spec
 log: "{{dir}}/audit.jsonl"
-verify: "{{python}} -m mcp_gateway.cli verify {{log}} --key-file key --anchor head.json"
+verify: "{{python}} -m mcp_lab.gateway.cli verify {{log}} --key-file key --anchor head.json"

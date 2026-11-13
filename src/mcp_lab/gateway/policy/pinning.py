@@ -9,7 +9,7 @@ is quarantined and calls to it are refused.
 import hashlib
 from typing import Any
 
-from mcp_gateway.audit.canonical import canonical
+from mcp_lab.gateway.audit.canonical import canonical
 
 
 def tool_fingerprint(name: str, description: str | None, input_schema: Any) -> str:

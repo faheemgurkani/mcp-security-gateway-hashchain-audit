@@ -33,12 +33,12 @@ from mcp.types import (
 )
 from starlette.applications import Starlette
 
-from mcp_gateway.audit import AuditChain, AuditWriteError
-from mcp_gateway.audit.canonical import canonical
-from mcp_gateway.audit.heartbeat import run_heartbeat
-from mcp_gateway.identity import Principal, SessionRegistry, find_impersonation_fields
-from mcp_gateway.policy import Policy, ToolPins, tool_fingerprint
-from mcp_gateway.validation import ArgumentError, ArgumentRules
+from mcp_lab.gateway.audit import AuditChain, AuditWriteError
+from mcp_lab.gateway.audit.canonical import canonical
+from mcp_lab.gateway.audit.heartbeat import run_heartbeat
+from mcp_lab.gateway.identity import Principal, SessionRegistry, find_impersonation_fields
+from mcp_lab.gateway.policy import Policy, ToolPins, tool_fingerprint
+from mcp_lab.gateway.validation import ArgumentError, ArgumentRules
 
 
 @dataclass

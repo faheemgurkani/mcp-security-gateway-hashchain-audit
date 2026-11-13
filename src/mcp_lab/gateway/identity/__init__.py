@@ -1,4 +1,4 @@
-from mcp_gateway.identity.session import (
+from mcp_lab.gateway.identity.session import (
     IMPERSONATION_FIELDS,
     Principal,
     SessionRegistry,

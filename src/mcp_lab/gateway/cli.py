@@ -1,4 +1,4 @@
-"""mcp-gateway: serve | verify | keygen | issue-token."""
+"""mcp-lab-gateway: serve | verify | keygen | issue-token."""
 
 import json
 import os
@@ -8,11 +8,11 @@ from pathlib import Path
 import typer
 import yaml
 
-from mcp_gateway.audit import AuditChain, FileAnchor, verify_log
-from mcp_gateway.identity import SessionRegistry, hash_token
-from mcp_gateway.identity.session import new_token
-from mcp_gateway.policy import Policy
-from mcp_gateway.validation import load_rules_file
+from mcp_lab.gateway.audit import AuditChain, FileAnchor, verify_log
+from mcp_lab.gateway.identity import SessionRegistry, hash_token
+from mcp_lab.gateway.identity.session import new_token
+from mcp_lab.gateway.policy import Policy
+from mcp_lab.gateway.validation import load_rules_file
 
 app = typer.Typer(no_args_is_help=True, add_completion=False)
 
@@ -77,7 +77,7 @@ def serve(
     """Run the reference gateway (Streamable HTTP at /mcp)."""
     import uvicorn
 
-    from mcp_gateway.proxy import GatewayConfig, build_app
+    from mcp_lab.gateway.proxy import GatewayConfig, build_app
 
     cfg = GatewayConfig(
         upstream_command=upstream,

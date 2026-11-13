@@ -15,8 +15,8 @@ import pytest
 from mcp import Client
 from mcp.client.streamable_http import streamable_http_client
 
-from mcp_gateway.audit import FileAnchor, verify_log
-from mcp_gateway.identity import hash_token
+from mcp_lab.gateway.audit import FileAnchor, verify_log
+from mcp_lab.gateway.identity import hash_token
 
 ROOT = Path(__file__).resolve().parents[2]
 KEY_HEX = "ab" * 32
@@ -44,7 +44,7 @@ def gateway(tmp_path):
     )
     port = _free_port()
     ledger = tmp_path / "ledger.jsonl"
-    cli = Path(sys.executable).parent / "mcp-gateway"
+    cli = Path(sys.executable).parent / "mcp-lab-gateway"
     proc = subprocess.Popen(
         [
             str(cli),

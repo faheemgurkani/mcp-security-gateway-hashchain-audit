@@ -45,7 +45,7 @@ USER_TOKEN = "user-token-harness"
 
 @contextlib.asynccontextmanager
 async def _reference(d: Path, env: dict[str, str]) -> AsyncIterator[Client]:
-    from mcp_gateway.identity import hash_token
+    from mcp_lab.gateway.identity import hash_token
 
     (d / "key").write_text(KEY_HEX)
     sessions = {"sessions": [{"principal": "alice", "role": "user", "token_sha256": ""}]}
@@ -54,7 +54,7 @@ async def _reference(d: Path, env: dict[str, str]) -> AsyncIterator[Client]:
     with socket.socket() as s:
         s.bind(("127.0.0.1", 0))
         port = s.getsockname()[1]
-    argv = [str(Path(sys.executable).parent / "mcp-gateway"), "serve"]
+    argv = [str(Path(sys.executable).parent / "mcp-lab-gateway"), "serve"]
     argv += ["--upstream", shlex.join(UPSTREAM), "--sessions", str(d / "sessions.yaml")]
     argv += ["--key-file", str(d / "key"), "--log", str(d / "audit.jsonl")]
     argv += ["--arg-rules", str(ARG_RULES)]
@@ -79,7 +79,7 @@ async def _reference(d: Path, env: dict[str, str]) -> AsyncIterator[Client]:
 
 
 def _reference_verify(d: Path) -> tuple[bool, str]:
-    from mcp_gateway.audit import FileAnchor, verify_log
+    from mcp_lab.gateway.audit import FileAnchor, verify_log
 
     r = verify_log(d / "audit.jsonl", bytes.fromhex(KEY_HEX), FileAnchor(d / "head.json").read())
     first = r.first_issue
@@ -88,8 +88,8 @@ def _reference_verify(d: Path) -> tuple[bool, str]:
 
 def _reference_forge(d: Path) -> None:
     """Without the key the attacker can only guess one; recompute with the guess."""
-    from mcp_gateway.audit import FileAnchor, Head
-    from mcp_gateway.audit.chain import GENESIS_MAC, compute_mac
+    from mcp_lab.gateway.audit import FileAnchor, Head
+    from mcp_lab.gateway.audit.chain import GENESIS_MAC, compute_mac
 
     p, guess = d / "audit.jsonl", b"\x00" * 32
     es = _entries(p)

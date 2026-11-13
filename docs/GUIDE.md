@@ -123,7 +123,7 @@ mcp-lab check-deployment \
   --key /etc/gateway/audit.key --log /var/log/gateway/audit.jsonl \
   --anchor /var/lib/gateway/head.json --agent-config ~/.config/agent/mcp.json \
   --secret /etc/gateway/upstream_token --tool-url http://tools:9000 \
-  --gateway-process mcp-gateway
+  --gateway-process mcp-lab-gateway
 ```
 
 ```
@@ -223,7 +223,7 @@ for this repo's gateway is [`threat-model/THREAT_MODEL.md`](threat-model/THREAT_
 
 ## The reference gateway with your own tools
 
-The reference gateway (`mcp-gateway serve`) is not tied to the demo tools:
+The reference gateway (`mcp-lab-gateway serve`) is not tied to the demo tools:
 
 - **roles:** `--policy roles.yaml` maps each role to the tool globs it may call;
 - **arguments:** each tool is validated against its own advertised input schema. That

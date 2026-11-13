@@ -2,8 +2,8 @@ import json
 
 import pytest
 
-from mcp_gateway.audit import AuditChain, AuditWriteError, FileAnchor, verify_log
-from mcp_gateway.audit.canonical import canonical
+from mcp_lab.gateway.audit import AuditChain, AuditWriteError, FileAnchor, verify_log
+from mcp_lab.gateway.audit.canonical import canonical
 
 KEY = b"k" * 32
 
@@ -80,7 +80,7 @@ def test_recomputing_chain_without_key_fails(log):  # A11: forge entries with a 
 
 
 def test_time_gap_detected(tmp_path, monkeypatch):  # A5: gateway silent for 60 s
-    import mcp_gateway.audit.chain as mod
+    import mcp_lab.gateway.audit.chain as mod
 
     chain = AuditChain(tmp_path / "gap.jsonl", KEY)
     chain.append("heartbeat", {"n": 1})

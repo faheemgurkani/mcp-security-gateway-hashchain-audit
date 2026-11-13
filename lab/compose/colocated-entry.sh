@@ -2,7 +2,7 @@
 # Start the gateway as a background process of the agent's own user.
 mkdir -p "$HOME/.gateway"
 S="$HOME/.gateway-secrets"
-mcp-gateway serve \
+mcp-lab-gateway serve \
   --upstream=http://tools:9000/mcp \
   --upstream-token-file="$S/upstream_token" \
   --arg-rules=/app/src/mcp_lab/demo/arg-rules.yaml \

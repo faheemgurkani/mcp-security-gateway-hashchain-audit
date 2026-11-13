@@ -4,7 +4,7 @@ Two things live in this repo: a **reference MCP security gateway**, and a
 **test lab** that attacks it (and other gateways) with the agent as the
 adversary.
 
-## Reference gateway (`src/mcp_gateway/`)
+## Reference gateway (`src/mcp_lab/gateway/`)
 
 A Streamable HTTP MCP server that proxies to stdio or HTTP tool servers. Each
 `tools/call` runs one pipeline:

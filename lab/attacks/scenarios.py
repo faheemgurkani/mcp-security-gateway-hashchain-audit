@@ -14,7 +14,7 @@ before/after copies of the audit log, all collected from outside the agent.
 from dataclasses import dataclass
 from typing import Any
 
-from mcp_gateway.audit.canonical import canonical
+from mcp_lab.gateway.audit.canonical import canonical
 
 
 @dataclass(frozen=True)

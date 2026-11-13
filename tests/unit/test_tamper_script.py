@@ -4,7 +4,7 @@ from pathlib import Path
 
 import pytest
 
-from mcp_gateway.audit import AuditChain, FileAnchor, verify_log
+from mcp_lab.gateway.audit import AuditChain, FileAnchor, verify_log
 
 ROOT = Path(__file__).resolve().parents[2]
 KEY = b"k" * 32

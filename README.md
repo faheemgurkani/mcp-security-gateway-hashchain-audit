@@ -126,12 +126,12 @@ Tool definitions are pinned at startup to catch rug pulls.
 
 ```bash
 uv sync
-uv run mcp-gateway keygen --out audit.key
-uv run mcp-gateway issue-token --sessions sessions.yaml --principal alice --role user
-uv run mcp-gateway serve --upstream "python -m mcp_lab.demo.server" \
+uv run mcp-lab-gateway keygen --out audit.key
+uv run mcp-lab-gateway issue-token --sessions sessions.yaml --principal alice --role user
+uv run mcp-lab-gateway serve --upstream "python -m mcp_lab.demo.server" \
     --sessions sessions.yaml --key-file audit.key \
     --log audit.jsonl --anchor head.json      # add --policy / --arg-rules for your tools
-uv run mcp-gateway verify audit.jsonl --key-file audit.key --anchor head.json
+uv run mcp-lab-gateway verify audit.jsonl --key-file audit.key --anchor head.json
 ```
 
 **Two-minute demo (no Docker):** `./scripts/run_demo.sh`.

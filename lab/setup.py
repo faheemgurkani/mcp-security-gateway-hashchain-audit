@@ -18,7 +18,7 @@ from pathlib import Path
 
 import yaml
 
-from mcp_gateway.identity import hash_token
+from mcp_lab.gateway.identity import hash_token
 
 RUN = Path(__file__).parent / ".run"
 GATEWAY_URLS = {

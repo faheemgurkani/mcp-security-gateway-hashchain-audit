@@ -14,7 +14,7 @@ import time
 from dataclasses import dataclass, field
 from pathlib import Path
 
-from mcp_gateway.audit import FileAnchor, VerifyReport, verify_log
+from mcp_lab.gateway.audit import FileAnchor, VerifyReport, verify_log
 
 ROOT = Path(__file__).resolve().parents[2]
 COMPOSE = ["docker", "compose", "-f", str(ROOT / "lab/compose/docker-compose.yml")]

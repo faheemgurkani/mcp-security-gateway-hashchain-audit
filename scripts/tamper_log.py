@@ -19,9 +19,9 @@ import argparse
 import json
 from pathlib import Path
 
-from mcp_gateway.audit.anchor import FileAnchor, Head
-from mcp_gateway.audit.canonical import canonical
-from mcp_gateway.audit.chain import GENESIS_MAC, compute_mac
+from mcp_lab.gateway.audit.anchor import FileAnchor, Head
+from mcp_lab.gateway.audit.canonical import canonical
+from mcp_lab.gateway.audit.chain import GENESIS_MAC, compute_mac
 
 
 def load(path: Path) -> list[dict]:

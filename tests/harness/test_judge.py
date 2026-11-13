@@ -3,8 +3,8 @@
 from types import SimpleNamespace
 
 from lab.attacks.scenarios import BY_ID, judge, unlogged_executions
-from mcp_gateway.audit import VerifyReport
-from mcp_gateway.audit.verify import Issue
+from mcp_lab.gateway.audit import VerifyReport
+from mcp_lab.gateway.audit.verify import Issue
 
 OK = VerifyReport(entries=3)
 BAD = VerifyReport(entries=3, issues=[Issue(2, 1, "mac_mismatch", "x")])

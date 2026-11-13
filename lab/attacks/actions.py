@@ -26,9 +26,9 @@ from typing import Any
 import anyio
 
 from lab.agent.client import CONFIG, connect, load_server
-from mcp_gateway.audit.anchor import FileAnchor, Head
-from mcp_gateway.audit.canonical import canonical
-from mcp_gateway.audit.chain import GENESIS_MAC, compute_mac
+from mcp_lab.gateway.audit.anchor import FileAnchor, Head
+from mcp_lab.gateway.audit.canonical import canonical
+from mcp_lab.gateway.audit.chain import GENESIS_MAC, compute_mac
 
 SEARCH_ROOTS = ["/home", "/tmp", "/var/lib", "/var/log", "/run", "/srv", "/opt/data"]
 DEFAULT_TOOL_URL = "http://tools:9000/mcp"  # what a curious agent would guess from DNS names
@@ -84,7 +84,7 @@ def gateway_procs() -> list[tuple[int, list[str]]]:
         except OSError:
             continue
         argv = [a.decode(errors="replace") for a in argv if a]
-        if any(a.endswith("mcp-gateway") for a in argv) and "serve" in argv:
+        if any(a.endswith("mcp-lab-gateway") for a in argv) and "serve" in argv:
             out.append((int(pid), argv))
     return out
 

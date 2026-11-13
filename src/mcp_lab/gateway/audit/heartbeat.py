@@ -7,7 +7,7 @@ reports it as ``time_gap`` when given ``max_gap_ms``.
 
 import anyio
 
-from mcp_gateway.audit.chain import AuditChain
+from mcp_lab.gateway.audit.chain import AuditChain
 
 
 async def run_heartbeat(chain: AuditChain, interval_s: float) -> None:

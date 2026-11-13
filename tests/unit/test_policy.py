@@ -1,8 +1,8 @@
 from pathlib import Path
 
-from mcp_gateway.policy import Policy, ToolPins, tool_fingerprint
+from mcp_lab.gateway.policy import Policy, ToolPins, tool_fingerprint
 
-POLICY = Policy.from_yaml(Path("src/mcp_gateway/policy/policy.yaml"))
+POLICY = Policy.from_yaml(Path("src/mcp_lab/gateway/policy/policy.yaml"))
 
 
 def test_user_can_call_crm():
@@ -29,7 +29,7 @@ def test_pattern_does_not_match_prefix_tricks():
 
 def test_policy_hash_stable_and_sensitive():
     other = Policy({"roles": {"user": {"allow": ["*"]}}})
-    assert POLICY.sha256 == Policy.from_yaml("src/mcp_gateway/policy/policy.yaml").sha256
+    assert POLICY.sha256 == Policy.from_yaml("src/mcp_lab/gateway/policy/policy.yaml").sha256
     assert POLICY.sha256 != other.sha256
 
 

@@ -8,7 +8,7 @@ set -euo pipefail
 cd "$(dirname "$0")/.."
 WORK="$(mktemp -d)"
 PORT="${PORT:-8765}"
-GW=(uv run --quiet mcp-gateway)
+GW=(uv run --quiet mcp-lab-gateway)
 trap 'kill "${GW_PID:-}" 2>/dev/null || true; rm -rf "$WORK"' EXIT
 
 echo "== setup (in $WORK)"

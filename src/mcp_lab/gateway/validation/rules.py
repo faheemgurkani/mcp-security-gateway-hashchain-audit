@@ -25,7 +25,7 @@ import yaml
 from jsonschema import Draft202012Validator, FormatChecker
 from jsonschema.exceptions import SchemaError
 
-from mcp_gateway.audit.canonical import canonical
+from mcp_lab.gateway.audit.canonical import canonical
 
 
 class ArgumentError(ValueError):

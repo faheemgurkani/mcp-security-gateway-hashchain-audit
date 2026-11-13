@@ -17,7 +17,7 @@ from typing import Any
 
 import yaml
 
-from mcp_gateway.audit.canonical import canonical
+from mcp_lab.gateway.audit.canonical import canonical
 
 
 @dataclass(frozen=True)

@@ -31,7 +31,7 @@ services:
     <<: *image
     user: gateway
     command:
-      - mcp-gateway
+      - mcp-lab-gateway
       - serve
       - --upstream=http://tools:9000/mcp
       - --upstream-token-file=/run/lab/upstream_token

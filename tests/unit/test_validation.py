@@ -2,7 +2,7 @@ from pathlib import Path
 
 import pytest
 
-from mcp_gateway.validation import ArgumentError, ArgumentRules, close_schema, load_rules_file
+from mcp_lab.gateway.validation import ArgumentError, ArgumentRules, close_schema, load_rules_file
 
 DEMO_RULES = Path(__file__).resolve().parents[2] / "src/mcp_lab/demo/arg-rules.yaml"
 
