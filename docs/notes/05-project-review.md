@@ -198,6 +198,22 @@ policy (D-013), its maintainer is told privately before anything is published.
 - **Owner action:** send that draft privately.
 - Results are published after the maintainer replies or a reasonable time passes.
 
+**Re-scored on 2026-11-14 (D-024).** The scores above were for the version on the package
+index. The project has since published a newer prerelease on its source host only, so
+that version was scored too, with the same spec and with signatures required and checked
+against the trusted public key:
+
+- **fixed in the prerelease:** the verifier now checks every signature, so the
+  newest-entry edit (A1) and the keyless rewrite (A12) are detected;
+- **still open:** truncating the log tail (A3) is accepted, and in its stdio mode every
+  caller still gets the same default identity, so per-agent role rules can't tell agents
+  apart;
+- **not yet on the package index:** a plain install still gives the older version, which
+  has every problem.
+
+The private draft was rewritten to say which problems remain in the latest code and which
+are fixed but unreleased.
+
 ### AI models as attackers (5 runs per test)
 
 **gpt-oss-120b:** done.
@@ -591,7 +607,8 @@ All of these are logged in `04-implementation-findings.md`.
 
 ### Next step
 
-The owner decides whether to lift the embargo on the held-back gateway. Maintainer
+The owner decides whether to lift the embargo on the held-back gateway; the draft now
+reflects the 2026-11-14 re-score of its latest prerelease (D-024). Maintainer
 outreach stays deferred until the owner chooses otherwise.
 
 Since then (2026-11-12, D-022), the repo has gained:
