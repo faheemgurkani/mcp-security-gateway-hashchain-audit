@@ -142,3 +142,9 @@ it.
 
 If you use the lab, its results or its attack catalogue, please cite it. The metadata is
 in [`CITATION.cff`](CITATION.cff), and GitHub's "Cite this repository" button renders it.
+
+## Releasing (maintainer)
+
+Releases go to PyPI as `mcp-gateway-lab` when a `v*` tag is pushed. The steps, and why
+each exists, are in
+[`docs/notes/06-publishing-to-pypi.md`](docs/notes/06-publishing-to-pypi.md#11-the-release-checklist-every-time).

@@ -1,0 +1,90 @@
+name: Release
+
+# Publishes to TestPyPI, checks the install, then publishes to PyPI.
+# Triggered by pushing a version tag, e.g. `git tag v0.3.0 && git push origin v0.3.0`.
+# Uses Trusted Publishing (OIDC): no API token is stored anywhere. See
+# docs/notes/06-publishing-to-pypi.md.
+
+on:
+  push:
+    tags: ["v*"]
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: astral-sh/setup-uv@v6
+        with:
+          python-version: "3.12"
+      - name: Tag matches the package version
+        run: |
+          v=$(uv run --no-project python -c "import re;print(re.search(r'__version__ = \"(.+)\"', open('src/mcp_lab/__init__.py').read())[1])")
+          test "v$v" = "$GITHUB_REF_NAME" || { echo "tag $GITHUB_REF_NAME != version $v"; exit 1; }
+      - run: uv sync --locked
+      - run: uv run ruff check .
+      - run: uv run pytest -q
+      - run: uv build
+      - name: Audit the distributions
+        run: uv run python scripts/check_dist.py dist
+      - run: uvx twine check --strict dist/*
+      - uses: actions/upload-artifact@v4
+        with:
+          name: dist
+          path: dist/
+
+  testpypi:
+    needs: build
+    runs-on: ubuntu-latest
+    environment:
+      name: testpypi
+      url: https://test.pypi.org/p/mcp-gateway-lab
+    permissions:
+      id-token: write
+    steps:
+      - uses: actions/download-artifact@v4
+        with:
+          name: dist
+          path: dist/
+      - uses: pypa/gh-action-pypi-publish@release/v1
+        with:
+          repository-url: https://test.pypi.org/legacy/
+
+  check-testpypi:
+    needs: testpypi
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: astral-sh/setup-uv@v6
+        with:
+          python-version: "3.12"
+      - name: Install from TestPyPI and score the toy gateway
+        run: |
+          v=${GITHUB_REF_NAME#v}
+          # The index can take a moment to show a new upload.
+          for i in 1 2 3 4 5 6; do
+            uv venv -q --clear /tmp/v && uv pip install -q --python /tmp/v/bin/python \
+              --index-url https://test.pypi.org/simple/ \
+              --extra-index-url https://pypi.org/simple/ \
+              --index-strategy unsafe-best-match \
+              "mcp-gateway-lab==$v" && break
+            sleep 20
+          done
+          /tmp/v/bin/mcp-lab version | grep -x "$v"
+          cd /tmp && PATH="/tmp/v/bin:$PATH" mcp-lab score --reference \
+            "$GITHUB_WORKSPACE/examples/specs/toy-gateway.yaml" --fail-on never
+
+  pypi:
+    needs: check-testpypi
+    runs-on: ubuntu-latest
+    environment:
+      name: pypi
+      url: https://pypi.org/p/mcp-gateway-lab
+    permissions:
+      id-token: write
+    steps:
+      - uses: actions/download-artifact@v4
+        with:
+          name: dist
+          path: dist/
+      - uses: pypa/gh-action-pypi-publish@release/v1
