@@ -15,12 +15,13 @@ lab into six concrete jobs. Each one takes minutes and needs no Docker.
 ## Install
 
 ```bash
-uv tool install git+https://github.com/faheemgurkani/mcp-security-gateway-hashchain-audit
+pipx install mcp-gateway-lab        # or: uv tool install mcp-gateway-lab
 mcp-lab --help
 ```
 
-Or, without installing: `uvx --from git+https://github.com/faheemgurkani/mcp-security-gateway-hashchain-audit mcp-lab ...`.
-You need Python 3.12+ and `uv`.
+Or, without installing: `uvx --from mcp-gateway-lab mcp-lab ...`. For the latest
+unreleased code: `uv tool install git+https://github.com/faheemgurkani/mcp-security-gateway-hashchain-audit`.
+You need Python 3.12+, and `pipx` or `uv`.
 
 ## 1. Score a gateway
 
@@ -159,7 +160,7 @@ writes the table to the job summary:
 ```yaml
 - uses: actions/checkout@v4
 - run: pip install .                    # make your gateway's command available
-- uses: faheemgurkani/mcp-security-gateway-hashchain-audit@main
+- uses: faheemgurkani/mcp-security-gateway-hashchain-audit@v0.3.0   # a release tag
   with:
     spec: ci/my-gateway.yaml
     fail-on: undetected                 # or: detected (stricter), never (report only)

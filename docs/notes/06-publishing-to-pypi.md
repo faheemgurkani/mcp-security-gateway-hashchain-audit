@@ -189,7 +189,43 @@ between steps.
 
 ## 10. One-time setup (owner)
 
-*(Filled in as it is done.)*
+Done once, on 2026-11-14:
+
+1. **Accounts.** PyPI already existed (it hosts `prosperity4btx`). A separate TestPyPI
+   account was created, and two-factor authentication is on for both.
+2. **Pending publishers.** On each site: Account → Publishing → *Add a new pending
+   publisher* → GitHub.
+   - project `mcp-gateway-lab`;
+   - owner `faheemgurkani`;
+   - repo `mcp-security-gateway-hashchain-audit`;
+   - workflow `release.yml`;
+   - environment `pypi` on PyPI, and `testpypi` on TestPyPI.
+
+   The first upload turned each into a normal trusted publisher and reserved the name.
+3. **GitHub environments** (Settings → Environments), created with `gh api`:
+   - `testpypi`, with no rules;
+   - `pypi`, which needs the owner as **required reviewer**, and has a deployment policy
+     allowing only `v*` **tags**.
+
+   Even a workflow run from a branch can't reach PyPI.
+
+**How the first release went (0.3.0):**
+
+1. The release commit (`c6e6ba9`) passed CI.
+2. Pushing tag `v0.3.0` ran the workflow: build, then TestPyPI, then the install check,
+   all green in about 1.5 minutes.
+3. The `pypi` job then waited for approval. The owner looked at the TestPyPI page,
+   approved, and the upload took 17 seconds.
+4. Checked afterwards:
+   - pypi.org serves the wheel and the sdist;
+   - a fresh install of `mcp-gateway-lab==0.3.0` from PyPI into a clean venv runs `mcp-lab version`
+     (0.3.0) and scores the toy gateway exactly as the README shows.
+5. A [GitHub release](https://github.com/faheemgurkani/mcp-security-gateway-hashchain-audit/releases/tag/v0.3.0)
+   was created from the tag, with the changelog section as its notes.
+
+**The GitHub Action** installs from the action's own checked-out code. Pinning the action
+to a release tag (`@v0.3.0`) therefore runs exactly the released code, while this repo's
+CI (`uses: ./`) keeps testing `main`. The docs now show `@v0.3.0` instead of `@main`.
 
 ## 11. The release checklist (every time)
 
@@ -213,6 +249,9 @@ between steps.
 - **The sdist would have leaked `docs/TODO.md`** (section 6). Fixed with an allow-list and
   an audit script.
 - **README links would have been broken on PyPI.** Fixed by making them absolute.
+- **Nothing failed during the release itself.** The checks in front of it (tag equals
+  version, content audit, `twine check`, TestPyPI install) are why: every problem
+  above was found before an upload, when it was still cheap to fix.
 - **A test Docker run overwrote a committed result file** (`lab/results/colocated.json`)
   with a partial run. Caught in `git status` and restored. Lesson: partial runs
   (`--only`) write to the same file as full runs.

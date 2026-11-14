@@ -29,7 +29,7 @@ account.
 ## Score a gateway in one command
 
 ```bash
-uv tool install git+https://github.com/faheemgurkani/mcp-security-gateway-hashchain-audit
+pipx install mcp-gateway-lab               # or: uv tool install mcp-gateway-lab
 mcp-lab template > my-gateway.yaml      # describe how to start your gateway (~10 lines)
 mcp-lab score my-gateway.yaml           # every attack, one table; exit 1 if any goes undetected
 ```
@@ -49,7 +49,7 @@ toy-gateway example (stdio)
 - **Specs to copy:** working specs for six gateways are in
   [`examples/specs/`](https://github.com/faheemgurkani/mcp-security-gateway-hashchain-audit/tree/main/examples/specs/).
 - **CI:** to gate your own CI, use this repo as a GitHub Action
-  (`uses: faheemgurkani/mcp-security-gateway-hashchain-audit@main` with `spec:`).
+  (`uses: faheemgurkani/mcp-security-gateway-hashchain-audit@v0.3.0` with `spec:`).
 - **Other jobs:**
   - `mcp-lab check-deployment` tells you which risk profile a real deployment is in;
   - `mcp-lab inspect-log` tells you what an audit log handed to you can actually prove.
